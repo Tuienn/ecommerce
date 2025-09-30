@@ -1,24 +1,13 @@
-const { userService } = require('../index.services')
+const { userService } = require('../index.service')
 const { ReasonPhrases, StatusCodes } = require('../../constants/httpStatusCode')
 const { AuthFailureError } = require('../../exceptions/error.models')
+const { handleSuccess } = require('../../utils/handleResponse')
 
 const { DEFAULT_EMAIL_ADMIN } = process.env
 
-const checkMainAdmin = (req) => {
-    const { role, email } = req.user
-    if (role !== 'admin' || email !== DEFAULT_EMAIL_ADMIN) {
-        throw new AuthFailureError('Chỉ admin tổng mới thực hiện được chức năng này')
-    }
-}
-
 const createUser = async (req, res) => {
-    checkMainAdmin(req)
     const data = await userService.createUser(req.body)
-    res.status(StatusCodes.CREATED).json({
-        code: StatusCodes.CREATED,
-        message: 'Tạo người dùng thành công',
-        data
-    })
+    return handleSuccess(res, data, 'Tạo người dùng thành công', StatusCodes.CREATED)
 }
 
 const getUserById = async (req, res) => {
@@ -32,21 +21,12 @@ const getUserById = async (req, res) => {
     }
 
     const data = await userService.getUserById(targetId)
-    res.status(StatusCodes.OK).json({
-        code: StatusCodes.OK,
-        message: ReasonPhrases.OK,
-        data
-    })
+    return handleSuccess(res, data, ReasonPhrases.OK, StatusCodes.OK)
 }
 
 const listUsers = async (req, res) => {
-    checkMainAdmin(req)
     const data = await userService.listUsers(req.query)
-    res.status(StatusCodes.OK).json({
-        code: StatusCodes.OK,
-        message: ReasonPhrases.OK,
-        data
-    })
+    return handleSuccess(res, data, ReasonPhrases.OK, StatusCodes.OK)
 }
 
 const updateUser = async (req, res) => {
@@ -65,41 +45,23 @@ const updateUser = async (req, res) => {
         if (typeof req.body.name === 'string') allowed.name = req.body.name
         // ignore other fields
         const data = await userService.updateUser(targetId, allowed)
-        return res.status(StatusCodes.OK).json({
-            code: StatusCodes.OK,
-            message: 'Cập nhật người dùng thành công',
-            data
-        })
+        return handleSuccess(res, data, 'Cập nhật người dùng thành công', StatusCodes.OK)
     }
 
     const data = await userService.updateUser(targetId, req.body)
-    res.status(StatusCodes.OK).json({
-        code: StatusCodes.OK,
-        message: 'Cập nhật người dùng thành công',
-        data
-    })
+    return handleSuccess(res, data, 'Cập nhật người dùng thành công', StatusCodes.OK)
 }
 
 const deleteUser = async (req, res) => {
-    checkMainAdmin(req)
-
     const data = await userService.deleteUser(req.params._id)
-    res.status(StatusCodes.OK).json({
-        code: StatusCodes.OK,
-        message: 'Xóa người dùng thành công',
-        data
-    })
+    return handleSuccess(res, data, 'Xóa người dùng thành công', StatusCodes.OK)
 }
 
 const setActive = async (req, res) => {
-    checkMainAdmin(req)
     const { isActive } = req.body
     const data = await userService.setUserActive(req.params._id, isActive)
-    res.status(StatusCodes.OK).json({
-        code: StatusCodes.OK,
-        message: isActive ? 'Đã bật tài khoản' : 'Đã tắt tài khoản',
-        data
-    })
+    const message = isActive ? 'Đã bật tài khoản' : 'Đã tắt tài khoản'
+    return handleSuccess(res, data, message, StatusCodes.OK)
 }
 
 module.exports = {

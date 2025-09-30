@@ -1,16 +1,13 @@
 const { authService } = require('../index.service')
 const { StatusCodes } = require('../../constants/httpStatusCode')
+const { handleSuccess } = require('../../utils/handleResponse')
 
 const login = async (req, res) => {
     const { email, password } = req.body
 
     const data = await authService.login(email, password)
 
-    res.status(StatusCodes.OK).json({
-        code: StatusCodes.OK,
-        message: 'Đăng nhập thành công',
-        data
-    })
+    return handleSuccess(res, data, 'Đăng nhập thành công', StatusCodes.OK)
 }
 
 const refreshToken = async (req, res) => {
@@ -18,11 +15,7 @@ const refreshToken = async (req, res) => {
 
     const data = await authService.refreshToken(refresh_token)
 
-    res.status(StatusCodes.OK).json({
-        code: StatusCodes.OK,
-        message: 'Làm mới token thành công',
-        data
-    })
+    return handleSuccess(res, data, 'Làm mới token thành công', StatusCodes.OK)
 }
 
 const logout = async (req, res) => {
@@ -30,11 +23,7 @@ const logout = async (req, res) => {
 
     const result = await authService.logout(refresh_token)
 
-    res.status(StatusCodes.OK).json({
-        code: StatusCodes.OK,
-        message: result.message,
-        data: null
-    })
+    return handleSuccess(res, null, result.message, StatusCodes.OK)
 }
 
 const getCurrentUser = async (req, res) => {
@@ -44,11 +33,7 @@ const getCurrentUser = async (req, res) => {
     const userDoc = await authService.getCurrentUser(token)
     const user = userDoc.toObject ? userDoc.toObject() : userDoc
 
-    res.status(StatusCodes.OK).json({
-        code: StatusCodes.OK,
-        message: 'Lấy thông tin người dùng thành công',
-        data: user
-    })
+    return handleSuccess(res, user, 'Lấy thông tin người dùng thành công', StatusCodes.OK)
 }
 
 module.exports = {

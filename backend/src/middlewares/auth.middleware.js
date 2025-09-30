@@ -6,10 +6,6 @@ const authenticateToken = async (req, _res, next) => {
     const token = authHeader && authHeader.split(' ')[1]
 
     if (!token) {
-        // return res.status(StatusCodes.UNAUTHORIZED).json({
-        //     code: StatusCodes.UNAUTHORIZED,
-        //     message: 'Access token không được cung cấp'
-        // })
         throw new AuthFailureError('Access token không được cung cấp')
     }
 
@@ -18,10 +14,6 @@ const authenticateToken = async (req, _res, next) => {
         req.user = user
         next()
     } catch (error) {
-        // return res.status(StatusCodes.FORBIDDEN).json({
-        //     code: StatusCodes.FORBIDDEN,
-        //     message: error.message || 'Token không hợp lệ'
-        // })
         throw new AuthFailureError(error.message || 'Token không hợp lệ')
     }
 }
