@@ -1,16 +1,16 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const cors = require('cors')
-const http = require('http')
-const helmet = require('helmet')
-require('dotenv').config()
+import express from 'express'
+import bodyParser from 'body-parser'
+import cors from 'cors'
+import http from 'http'
+import helmet from 'helmet'
+import 'dotenv/config'
 
-const routes = require('./src/modules/index.route.js')
-const { limiter } = require('./src/middlewares/rateLimiter.middleware')
-const { sanitize } = require('./src/middlewares/sanitize.middleware')
+import routes from './src/modules/index.route.js'
+import { limiter } from './src/middlewares/rateLimiter.middleware.js'
+import { sanitize } from './src/middlewares/sanitize.middleware.js'
 
-require('./src/db/init.mongodb.js')
-const { checkOverLoad } = require('./src/helpers/check.connect.js')
+import './src/db/init.mongodb.js'
+import { checkOverLoad } from './src/helpers/check.connect.js'
 
 checkOverLoad()
 

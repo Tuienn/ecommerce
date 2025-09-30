@@ -1,5 +1,5 @@
-const { AuthFailureError } = require('../exceptions/error.models')
-const { authService } = require('../modules/index.service')
+import { AuthFailureError } from '../exceptions/error.models.js'
+import * as authService from '../modules/auth/auth.service.js'
 
 const authenticateToken = async (req, _res, next) => {
     const authHeader = req.headers['authorization']
@@ -18,4 +18,4 @@ const authenticateToken = async (req, _res, next) => {
     }
 }
 
-module.exports = authenticateToken
+export default authenticateToken

@@ -1,8 +1,8 @@
-const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate-v2')
-const bcrypt = require('bcryptjs')
+import { Schema, model } from 'mongoose'
+import mongoosePaginate from 'mongoose-paginate-v2'
+import { hash, compare } from 'bcryptjs'
 
-const userSchema = new mongoose.Schema(
+const userSchema = new Schema(
     {
         name: {
             type: String,
@@ -23,8 +23,8 @@ const userSchema = new mongoose.Schema(
         role: {
             type: String,
             required: true,
-            enum: ['admin', 'user', 'staff'],
-            default: 'user'
+            enum: ['admin', 'customer', 'staff'],
+            default: 'customer'
         },
         isActive: {
             type: Boolean,
@@ -36,12 +36,16 @@ const userSchema = new mongoose.Schema(
     }
 )
 
+userSchema.index({ email: 1 }, { unique: true }) // login nhanh
+userSchema.index({ username: 1 }, { unique: true })
+userSchema.index({ phone: 1 }, { unique: true })
+
 // Hash password before saving
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next()
 
     try {
-        this.password = await bcrypt.hash(this.password, 10)
+        this.password = await hash(this.password, 10)
         next()
     } catch (error) {
         next(error)
@@ -50,10 +54,10 @@ userSchema.pre('save', async function (next) {
 
 // Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {
-    return await bcrypt.compare(candidatePassword, this.password)
+    return await compare(candidatePassword, this.password)
 }
 
 userSchema.plugin(mongoosePaginate)
-const User = mongoose.model('User', userSchema)
+const User = model('User', userSchema)
 
-module.exports = User
+export default User

@@ -1,9 +1,9 @@
-const express = require('express')
+import { Router } from 'express'
 
-const authRoute = require('./auth/auth.route')
-const userRoute = require('./user/user.route')
+import authRoute from './auth/auth.route.js'
+import userRoute from './user/user.route.js'
 
-const router = express.Router()
+const router = Router()
 
 const defaultRoutes = [
     { path: '/api/auth', route: authRoute },
@@ -14,4 +14,4 @@ defaultRoutes.forEach((route) => {
     router.use(route.path, route.route)
 })
 
-module.exports = router
+export default router

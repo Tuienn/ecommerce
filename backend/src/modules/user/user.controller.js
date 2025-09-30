@@ -1,16 +1,16 @@
-const { userService } = require('../index.service')
-const { ReasonPhrases, StatusCodes } = require('../../constants/httpStatusCode')
-const { AuthFailureError } = require('../../exceptions/error.models')
-const { handleSuccess } = require('../../utils/handleResponse')
+import * as userService from './user.service.js'
+import { StatusCodes } from '../../constants/httpStatusCode.js'
+import { AuthFailureError } from '../../exceptions/error.models.js'
+import { handleSuccess } from '../../utils/handleResponse.js'
 
 const { DEFAULT_EMAIL_ADMIN } = process.env
 
-const createUser = async (req, res) => {
+export const createUser = async (req, res) => {
     const data = await userService.createUser(req.body)
     return handleSuccess(res, data, 'Tạo người dùng thành công', StatusCodes.CREATED)
 }
 
-const getUserById = async (req, res) => {
+export const getUserById = async (req, res) => {
     const targetId = req.params._id
     const current = req.user
 
@@ -21,15 +21,15 @@ const getUserById = async (req, res) => {
     }
 
     const data = await userService.getUserById(targetId)
-    return handleSuccess(res, data, ReasonPhrases.OK, StatusCodes.OK)
+    return handleSuccess(res, data)
 }
 
-const listUsers = async (req, res) => {
+export const listUsers = async (req, res) => {
     const data = await userService.listUsers(req.query)
-    return handleSuccess(res, data, ReasonPhrases.OK, StatusCodes.OK)
+    return handleSuccess(res, data)
 }
 
-const updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
     const targetId = req.params._id
     const current = req.user
     const isMainAdmin = current.role === 'admin' && current.email === DEFAULT_EMAIL_ADMIN
@@ -45,30 +45,21 @@ const updateUser = async (req, res) => {
         if (typeof req.body.name === 'string') allowed.name = req.body.name
         // ignore other fields
         const data = await userService.updateUser(targetId, allowed)
-        return handleSuccess(res, data, 'Cập nhật người dùng thành công', StatusCodes.OK)
+        return handleSuccess(res, data, 'Cập nhật người dùng thành công')
     }
 
     const data = await userService.updateUser(targetId, req.body)
-    return handleSuccess(res, data, 'Cập nhật người dùng thành công', StatusCodes.OK)
+    return handleSuccess(res, data, 'Cập nhật người dùng thành công')
 }
 
-const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
     const data = await userService.deleteUser(req.params._id)
-    return handleSuccess(res, data, 'Xóa người dùng thành công', StatusCodes.OK)
+    return handleSuccess(res, data, 'Xóa người dùng thành công')
 }
 
-const setActive = async (req, res) => {
+export const setActive = async (req, res) => {
     const { isActive } = req.body
     const data = await userService.setUserActive(req.params._id, isActive)
     const message = isActive ? 'Đã bật tài khoản' : 'Đã tắt tài khoản'
-    return handleSuccess(res, data, message, StatusCodes.OK)
-}
-
-module.exports = {
-    createUser,
-    getUserById,
-    listUsers,
-    updateUser,
-    deleteUser,
-    setActive
+    return handleSuccess(res, data, message)
 }

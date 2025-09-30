@@ -1,4 +1,4 @@
-function sanitize(obj) {
+export function sanitize(obj) {
     for (const key in obj) {
         if (/[$.]/.test(key)) {
             delete obj[key]
@@ -8,7 +8,7 @@ function sanitize(obj) {
     }
 }
 
-const sanitizeInput = (req, res, next) => {
+export const sanitizeInput = (req, res, next) => {
     if (req.body) {
         sanitize(req.body)
     }
@@ -20,5 +20,3 @@ const sanitizeInput = (req, res, next) => {
     }
     next()
 }
-
-module.exports = { sanitize, sanitizeInput }

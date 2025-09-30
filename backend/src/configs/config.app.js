@@ -36,4 +36,4 @@ const config = { dev, pro }
 const env = process.env.NODE_ENV || 'dev' // Default to 'dev' if NODE_ENV is not set
 
 console.log(config[env], env)
-module.exports = config[env]
+export default config[env]

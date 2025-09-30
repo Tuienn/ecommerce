@@ -1,10 +1,10 @@
-const { User } = require('../index.model')
-const bcrypt = require('bcryptjs')
-const { NotFoundError, ConflictRequestError } = require('../../exceptions/error.models')
+import User from './user.model.js'
+import { hash } from 'bcryptjs'
+import { NotFoundError, ConflictRequestError } from '../../exceptions/error.models.js'
 
 const { DEFAULT_EMAIL_ADMIN, DEFAULT_PASSWORD_ADMIN } = process.env
 
-const createDefaultAdmin = async () => {
+export const createDefaultAdmin = async () => {
     try {
         const existingAdmin = await User.findOne({ email: DEFAULT_EMAIL_ADMIN })
 
@@ -41,29 +41,32 @@ const createDefaultAdmin = async () => {
     }
 }
 
-const createUser = async (data) => {
-    const { name, email, password, role, isActive } = data
+export const createUser = async (data) => {
+    try {
+        const { name, email, password, role, isActive } = data
 
-    const existingUser = await User.findOne({ email })
-    if (existingUser) {
-        throw new ConflictRequestError('Email này đã được sử dụng')
+        const existingUser = await User.findOne({ email })
+        if (existingUser) {
+            throw new ConflictRequestError('Email này đã được sử dụng')
+        }
+
+        const newUser = await User.create({
+            name,
+            email,
+            password,
+            role,
+            isActive: isActive !== undefined ? !!isActive : true
+        })
+
+        const userResponse = newUser.toObject()
+        delete userResponse.password
+
+        return userResponse
+    } catch (error) {
+        throw error
     }
-
-    const newUser = await User.create({
-        name,
-        email,
-        password,
-        role,
-        isActive: isActive !== undefined ? !!isActive : true
-    })
-
-    const userResponse = newUser.toObject()
-    delete userResponse.password
-
-    return userResponse
 }
-
-const listUsers = async ({ page = 1, limit = 20, search = '' } = {}) => {
+export const listUsers = async ({ page = 1, limit = 20, search = '' } = {}) => {
     const query = { role: { $ne: 'admin' } } // exclude admin users
     if (search) {
         query.email = { $regex: search, $options: 'i' }
@@ -75,7 +78,7 @@ const listUsers = async ({ page = 1, limit = 20, search = '' } = {}) => {
         sort: { createdAt: -1 }
     }
     const result = await User.paginate(query, options)
-    // map docs' permissions to nested shape
+
     result.docs = result.docs.map((doc) => {
         const obj = doc.toObject ? doc.toObject() : doc
         return obj
@@ -83,7 +86,7 @@ const listUsers = async ({ page = 1, limit = 20, search = '' } = {}) => {
     return result
 }
 
-const getUserById = async (userId) => {
+export const getUserById = async (userId) => {
     const user = await User.findById(userId).select('-password')
 
     if (!user) {
@@ -95,8 +98,8 @@ const getUserById = async (userId) => {
     return obj
 }
 
-const updateUser = async (userId, data) => {
-    const { email, role, password, isActive, permissions, name } = data
+export const updateUser = async (userId, data) => {
+    const { email, role, password, isActive, name } = data
 
     const user = await User.findById(userId)
     if (!user) {
@@ -115,7 +118,7 @@ const updateUser = async (userId, data) => {
     if (name) updateData.name = name
     if (role) updateData.role = role
     if (password) {
-        updateData.password = await bcrypt.hash(password, 10)
+        updateData.password = await hash(password, 10)
     }
     if (typeof isActive === 'boolean') updateData.isActive = isActive
 
@@ -125,7 +128,7 @@ const updateUser = async (userId, data) => {
     return obj
 }
 
-const deleteUser = async (userId) => {
+export const deleteUser = async (userId) => {
     const user = await User.findById(userId)
     if (!user) {
         throw new NotFoundError('Không tìm thấy người dùng')
@@ -135,7 +138,7 @@ const deleteUser = async (userId) => {
     return { message: 'Xóa người dùng thành công' }
 }
 
-const setUserActive = async (userId, isActive) => {
+export const setUserActive = async (userId, isActive) => {
     const user = await User.findById(userId)
     if (!user) throw new NotFoundError('Không tìm thấy người dùng')
     if (user.role === 'admin' && user.email === DEFAULT_EMAIL_ADMIN) {
@@ -148,5 +151,3 @@ const setUserActive = async (userId, isActive) => {
 
     return obj
 }
-
-module.exports = { createDefaultAdmin, createUser, listUsers, getUserById, updateUser, deleteUser, setUserActive }

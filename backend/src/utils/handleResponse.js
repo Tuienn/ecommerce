@@ -1,4 +1,4 @@
-const { ReasonPhrases, StatusCodes } = require('../constants/httpStatusCode')
+import { ReasonPhrases, StatusCodes } from '../constants/httpStatusCode.js'
 
 const handleSuccess = (res, data = null, message = ReasonPhrases.OK, status = StatusCodes.OK) => {
     return res.status(status).json({
@@ -19,7 +19,4 @@ const handleError = (
     })
 }
 
-module.exports = {
-    handleSuccess,
-    handleError
-}
+export { handleSuccess, handleError }

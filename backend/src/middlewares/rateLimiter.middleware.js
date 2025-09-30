@@ -1,6 +1,6 @@
-const rateLimit = require('express-rate-limit')
+import rateLimit from 'express-rate-limit'
 
-const limiter = rateLimit({
+export const limiter = rateLimit({
     windowMs: 1 * 60 * 1000,
     max: 100,
     standardHeaders: true,
@@ -11,7 +11,7 @@ const limiter = rateLimit({
     }
 })
 
-const otpRequestLimiter = rateLimit({
+export const otpRequestLimiter = rateLimit({
     windowMs: 1 * 60 * 1000,
     max: 5,
     standardHeaders: true,
@@ -21,8 +21,3 @@ const otpRequestLimiter = rateLimit({
         error: 'Too many OTP requests. Please wait a minute.'
     }
 })
-
-module.exports = {
-    limiter,
-    otpRequestLimiter
-}

@@ -1,5 +1,5 @@
 // middlewares/authorize.js
-const { AuthFailureError } = require('../exceptions/error.models')
+import { AuthFailureError } from '../exceptions/error.models.js'
 
 /**
  * @param {string|string[]} roles - role được phép truy cập (vd: 'admin' hoặc ['admin','user'])
@@ -23,4 +23,4 @@ function authorize(roles = []) {
     }
 }
 
-module.exports = authorize
+export default authorize

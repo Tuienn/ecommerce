@@ -1,8 +1,8 @@
-const mongoose = require('mongoose')
+import { Schema, model } from 'mongoose'
 
-const tokenSchema = new mongoose.Schema({
+const authSchema = new Schema({
     user: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true,
         ref: 'User',
         unique: true
@@ -11,19 +11,20 @@ const tokenSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    refreshTokenUsed: {
-        type: Array,
-        default: []
+    revokedAt: {
+        type: Date, // lưu thời điểm revoke
+        default: null
     },
     createdAt: {
         type: Date,
         default: Date.now,
-        expires: 30 * 24 * 60 * 60
+        expires: 30 * 24 * 60 * 60 // vẫn tự xoá token quá 30 ngày
     }
 })
 
-tokenSchema.index({ expireAfterSeconds: 30 * 24 * 60 * 60 })
+// TTL index cho revokedAt (chỉ có hiệu lực khi revokedAt != null)
+authSchema.index({ revokedAt: 1 }, { expireAfterSeconds: 15 * 24 * 60 * 60 })
 
-const Token = mongoose.model('Token', tokenSchema)
+const Auth = model('Auth', authSchema)
 
-module.exports = Token
+export default Auth

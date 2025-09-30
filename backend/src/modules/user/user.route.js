@@ -1,8 +1,8 @@
-const { userController } = require('../index.controller')
-const { Router } = require('express')
-const asyncHandler = require('../../helpers/asyncHandler')
-const authenticateToken = require('../../middlewares/auth.middleware')
-const authorize = require('../../middlewares/authorize.middleware')
+import * as userController from './user.controller.js'
+import { Router } from 'express'
+import asyncHandler from '../../helpers/asyncHandler.js'
+import authenticateToken from '../../middlewares/auth.middleware.js'
+import authorize from '../../middlewares/authorize.middleware.js'
 
 const router = Router()
 router.use(authenticateToken)
@@ -14,4 +14,4 @@ router.put('/:_id', asyncHandler(userController.updateUser))
 router.delete('/:_id', authorize('admin'), asyncHandler(userController.deleteUser))
 router.patch('/:_id/active', asyncHandler(userController.setActive))
 
-module.exports = router
+export default router

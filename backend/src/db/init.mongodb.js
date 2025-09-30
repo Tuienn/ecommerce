@@ -1,12 +1,10 @@
 'use strict'
 
-const mongoose = require('mongoose')
-const {
-    db: { url }
-} = require('../configs/config.app.js') // import db config
-const { countConnect } = require('../helpers/check.connect.js') // check number of connections
-const { createDefaultAdmin } = require('../modules/user/user.service')
-const connectString = url
+import mongoose from 'mongoose'
+import config from '../configs/config.app.js' // import db config
+import { countConnect } from '../helpers/check.connect.js' // check number of connections
+import { createDefaultAdmin } from '../modules/user/user.service.js'
+const connectString = config.db.url
 
 class Database {
     constructor() {
@@ -45,4 +43,4 @@ class Database {
 }
 
 const instanceMongoDb = Database.getInstance()
-module.exports = instanceMongoDb
+export default instanceMongoDb

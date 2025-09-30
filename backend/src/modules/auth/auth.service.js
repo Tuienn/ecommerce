@@ -1,20 +1,19 @@
-const { User, Token } = require('../index.model')
-const { NotFoundError, AuthFailureError } = require('../../exceptions/error.models')
-const {
+import User from '../user/user.model.js'
+import Auth from './auth.model.js'
+import { NotFoundError, AuthFailureError, BadRequestError } from '../../exceptions/error.models.js'
+import {
     generateAccessToken,
     generateRefreshToken,
     verifyAccessToken,
     verifyRefreshToken
-} = require('../../utils/handleJwtToken')
+} from '../../utils/handleJwtToken.js'
 
-const login = async (email, password) => {
+export const login = async (email, password) => {
     try {
         const user = await User.findOne({ email })
         if (!user) {
             throw new AuthFailureError('Email hoặc mật khẩu không đúng')
         }
-
-        // console.log(user);
 
         if (user.isActive === false) {
             throw new AuthFailureError('Tài khoản đã bị vô hiệu hoá')
@@ -28,35 +27,36 @@ const login = async (email, password) => {
         const tokenPayload = {
             userId: user._id,
             email: user.email,
-            role: user.role,
-            permissions: user.permissions || []
+            role: user.role
         }
 
         const accessToken = generateAccessToken(tokenPayload)
         const refreshToken = generateRefreshToken({ userId: user._id })
 
-        await Token.findOneAndUpdate({ user: user._id }, { refreshToken }, { upsert: true, new: true })
+        await Auth.findOneAndUpdate({ user: user._id }, { refreshToken }, { upsert: true, new: true })
 
         const expiredTime = new Date(Date.now() + 15 * 60 * 1000).toISOString()
 
         return {
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            expired_time: expiredTime,
+            accessToken,
+            refreshToken,
+            expiredTime,
             role: user.role,
             name: user.name,
             email: user.email
         }
     } catch (error) {
-        throw error
+        throw new BadRequestError('Đăng nhập thất bại')
     }
 }
 
-const refreshToken = async (refreshTokenString) => {
+export const refreshToken = async (refreshTokenString) => {
     try {
+        // 1. Verify refresh token
         const decoded = verifyRefreshToken(refreshTokenString)
 
-        const tokenDoc = await Token.findOne({
+        // 2. Kiểm tra refresh token trong DB
+        const tokenDoc = await Auth.findOne({
             user: decoded.userId,
             refreshToken: refreshTokenString
         })
@@ -65,10 +65,12 @@ const refreshToken = async (refreshTokenString) => {
             throw new AuthFailureError('Refresh token không hợp lệ')
         }
 
-        if (tokenDoc.refreshTokenUsed.includes(refreshTokenString)) {
-            throw new AuthFailureError('Refresh token đã được sử dụng')
+        // 3. Nếu refresh token đã bị đánh dấu revoke/ban thì chặn
+        if (tokenDoc.revokedAt) {
+            throw new AuthFailureError('Refresh token đã bị thu hồi')
         }
 
+        // 4. Kiểm tra user
         const user = await User.findById(decoded.userId)
         if (!user) {
             throw new NotFoundError('Không tìm thấy người dùng')
@@ -77,6 +79,7 @@ const refreshToken = async (refreshTokenString) => {
             throw new AuthFailureError('Tài khoản đã bị vô hiệu hoá')
         }
 
+        // 5. Sinh access token mới
         const tokenPayload = {
             userId: user._id,
             email: user.email,
@@ -84,35 +87,44 @@ const refreshToken = async (refreshTokenString) => {
         }
 
         const newAccessToken = generateAccessToken(tokenPayload)
-        const newRefreshToken = generateRefreshToken({ userId: user._id })
 
-        tokenDoc.refreshTokenUsed.push(refreshTokenString)
-        await tokenDoc.save()
+        // 6. Không tạo refresh token mới, chỉ trả lại access token
         return {
-            access_token: newAccessToken,
-            refresh_token: newRefreshToken
+            accessToken: newAccessToken
         }
     } catch (error) {
         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
             throw new AuthFailureError('Refresh token không hợp lệ hoặc đã hết hạn')
         }
-        throw error
+        throw new BadRequestError('Làm mới token thất bại')
     }
 }
 
-const logout = async (refreshTokenString) => {
+export const logout = async (refreshTokenString) => {
     try {
+        // 1. Verify refresh token
         const decoded = verifyRefreshToken(refreshTokenString)
 
-        const result = await Token.findOneAndDelete({
+        // 2. Tìm token trong DB
+        const tokenDoc = await Auth.findOne({
             user: decoded.userId,
             refreshToken: refreshTokenString
         })
 
-        if (!result) {
+        if (!tokenDoc) {
             throw new AuthFailureError('Refresh token không hợp lệ')
         }
 
+        // 3. Gắn cờ revokedAt
+        if (tokenDoc.revokedAt) {
+            // Tránh revoke nhiều lần -> có thể log warning
+            throw new AuthFailureError('Refresh token đã bị thu hồi trước đó')
+        }
+
+        tokenDoc.revokedAt = new Date()
+        await tokenDoc.save()
+
+        // 4. Trả kết quả
         return {
             message: 'Đăng xuất thành công'
         }
@@ -120,11 +132,11 @@ const logout = async (refreshTokenString) => {
         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
             throw new AuthFailureError('Refresh token không hợp lệ hoặc đã hết hạn')
         }
-        throw error
+        throw new BadRequestError('Đăng xuất thất bại')
     }
 }
 
-const getCurrentUser = async (accessToken) => {
+export const getCurrentUser = async (accessToken) => {
     try {
         const decoded = verifyAccessToken(accessToken)
 
@@ -141,14 +153,6 @@ const getCurrentUser = async (accessToken) => {
         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
             throw new AuthFailureError('Access token không hợp lệ hoặc đã hết hạn')
         }
-        throw error
+        throw new BadRequestError('Lấy thông tin người dùng thất bại')
     }
-}
-
-module.exports = {
-    login,
-    refreshToken,
-    logout,
-    getCurrentUser,
-    verifyAccessToken
 }
