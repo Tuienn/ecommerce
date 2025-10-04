@@ -3,7 +3,7 @@
 import mongoose from 'mongoose'
 import config from '../configs/config.app.js' // import db config
 import { countConnect } from '../helpers/check.connect.js' // check number of connections
-import { createDefaultAdmin } from '../modules/user/user.service.js'
+import { UserService } from '../modules/index.service.js'
 const connectString = config.db.url
 
 class Database {
@@ -24,7 +24,7 @@ class Database {
             console.log(`MongoDB connection string: ${connectString}`)
 
             // Create default admin user after successful connection
-            await createDefaultAdmin()
+            await UserService.createDefaultAdmin()
             // await importBanks()
             // await importScammer()
         } catch (err) {

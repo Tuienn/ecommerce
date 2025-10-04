@@ -44,3 +44,14 @@ export class OtpError extends ErrorResponse {
         super(message, statusCode)
     }
 }
+
+export const isExpectedError = (err) => {
+    return (
+        err instanceof ConflictRequestError ||
+        err instanceof BadRequestError ||
+        err instanceof AuthFailureError ||
+        err instanceof NotFoundError ||
+        err instanceof ForbiddenError ||
+        err instanceof OtpError
+    )
+}

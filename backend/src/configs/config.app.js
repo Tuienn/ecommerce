@@ -4,7 +4,7 @@ const { DB_USER, DB_PASSWORD, DB_HOST, DB_NAME } = process.env
 
 const mongodbUrl = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority&appName=${DB_NAME}`
 
-const dev = {
+const development = {
     app: {
         port: process.env.DEV_APP_PORT || 4000
     },
@@ -18,7 +18,7 @@ const dev = {
     // }
 }
 
-const pro = {
+const production = {
     app: {
         port: process.env.PORT || 4000
     },
@@ -32,8 +32,7 @@ const pro = {
     // }
 }
 
-const config = { dev, pro }
-const env = process.env.NODE_ENV || 'dev' // Default to 'dev' if NODE_ENV is not set
+const config = { development, production }
+const env = process.env.NODE_ENV || 'development' // Default to 'dev' if NODE_ENV is not set
 
-console.log(config[env], env)
 export default config[env]
