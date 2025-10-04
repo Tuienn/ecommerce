@@ -1,5 +1,5 @@
 // middlewares/authorize.js
-import { AuthFailureError } from '../exceptions/error.models.js'
+import { AuthFailureError } from '../exceptions/error.handler.js'
 
 /**
  * @param {string|string[]} roles - role được phép truy cập (vd: 'admin' hoặc ['admin','user'])

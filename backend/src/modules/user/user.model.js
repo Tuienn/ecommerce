@@ -7,18 +7,29 @@ const userSchema = new Schema(
         name: {
             type: String,
             trim: true,
-            required: true
+            required: true,
+            maxlength: 100,
+            index: true
         },
         email: {
             type: String,
             required: true,
-            unique: true,
-            trim: true
+            trim: true,
+            maxlength: 100,
+            index: true
         },
+        phone: {
+            type: String,
+            required: true,
+            trim: true,
+            index: true
+        },
+
         password: {
             type: String,
             required: true,
-            minlength: 6
+            minlength: 6,
+            select: false // không trả về password khi query
         },
         role: {
             type: String,
@@ -35,10 +46,6 @@ const userSchema = new Schema(
         timestamps: true
     }
 )
-
-userSchema.index({ email: 1 }, { unique: true }) // login nhanh
-userSchema.index({ username: 1 }, { unique: true })
-userSchema.index({ phone: 1 }, { unique: true })
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {

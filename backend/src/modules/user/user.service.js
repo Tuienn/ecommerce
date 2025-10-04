@@ -1,6 +1,6 @@
-import User from './user.model.js'
+import { User } from '../index.model.js'
 import { hash } from 'bcryptjs'
-import { NotFoundError, ConflictRequestError } from '../../exceptions/error.models.js'
+import { NotFoundError, ConflictRequestError } from '../../exceptions/error.handler.js'
 
 const { DEFAULT_EMAIL_ADMIN, DEFAULT_PASSWORD_ADMIN } = process.env
 
@@ -43,7 +43,7 @@ export const createDefaultAdmin = async () => {
 
 export const createUser = async (data) => {
     try {
-        const { name, email, password, role, isActive } = data
+        const { name, email, password, role, phone } = data
 
         const existingUser = await User.findOne({ email })
         if (existingUser) {
@@ -54,8 +54,8 @@ export const createUser = async (data) => {
             name,
             email,
             password,
-            role,
-            isActive: isActive !== undefined ? !!isActive : true
+            phone,
+            role
         })
 
         const userResponse = newUser.toObject()
@@ -150,4 +150,9 @@ export const setUserActive = async (userId, isActive) => {
     delete obj.password
 
     return obj
+}
+
+export const checkIsExists = async (collections) => {
+    const user = await User.exists(collections)
+    return !!user
 }

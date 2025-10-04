@@ -8,6 +8,7 @@ import 'dotenv/config'
 import routes from './src/modules/index.route.js'
 import { limiter } from './src/middlewares/rateLimiter.middleware.js'
 import { sanitize } from './src/middlewares/sanitize.middleware.js'
+import httpLogger from './src/middlewares/http.middleware.js'
 
 import './src/db/init.mongodb.js'
 import { checkOverLoad } from './src/helpers/check.connect.js'
@@ -29,6 +30,11 @@ app.use((_req, res, next) => {
 app.set('trust proxy', 1)
 app.use(bodyParser.json({ limit: '5mb' }))
 app.use(express.urlencoded({ extended: true, limit: '5mb' }))
+
+// HTTP Logger - chỉ bật khi development
+if (process.env.NODE_ENV !== 'production') {
+    app.use(httpLogger)
+}
 
 app.use((req, res, next) => {
     if (req.body) sanitize(req.body)

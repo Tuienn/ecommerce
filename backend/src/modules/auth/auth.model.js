@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose'
 
-const authSchema = new Schema({
+const AuthSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         required: true,
@@ -23,8 +23,8 @@ const authSchema = new Schema({
 })
 
 // TTL index cho revokedAt (chỉ có hiệu lực khi revokedAt != null)
-authSchema.index({ revokedAt: 1 }, { expireAfterSeconds: 15 * 24 * 60 * 60 })
+AuthSchema.index({ revokedAt: 1 }, { expireAfterSeconds: 15 * 24 * 60 * 60 })
 
-const Auth = model('Auth', authSchema)
+const Auth = model('Auth', AuthSchema)
 
 export default Auth

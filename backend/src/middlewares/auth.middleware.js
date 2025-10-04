@@ -1,4 +1,4 @@
-import { AuthFailureError } from '../exceptions/error.models.js'
+import { AuthFailureError } from '../exceptions/error.handler.js'
 import * as authService from '../modules/auth/auth.service.js'
 
 const authenticateToken = async (req, _res, next) => {

@@ -1,17 +1,23 @@
-import User from '../user/user.model.js'
-import Auth from './auth.model.js'
-import { NotFoundError, AuthFailureError, BadRequestError } from '../../exceptions/error.models.js'
+import { User, Auth } from '../index.model.js'
+import {
+    NotFoundError,
+    AuthFailureError,
+    BadRequestError,
+    ConflictRequestError
+} from '../../exceptions/error.handler.js'
 import {
     generateAccessToken,
     generateRefreshToken,
     verifyAccessToken,
     verifyRefreshToken
-} from '../../utils/handleJwtToken.js'
+} from '../../utils/handleJwt.js'
+import { OTPService, UserService } from '../index.service.js'
 
 export const login = async (email, password) => {
     try {
-        const user = await User.findOne({ email })
+        const user = await User.findOne({ email }).select('+password')
         if (!user) {
+            console.log('User not found with email:', email)
             throw new AuthFailureError('Email hoặc mật khẩu không đúng')
         }
 
@@ -36,6 +42,7 @@ export const login = async (email, password) => {
         await Auth.findOneAndUpdate({ user: user._id }, { refreshToken }, { upsert: true, new: true })
 
         const expiredTime = new Date(Date.now() + 15 * 60 * 1000).toISOString()
+        console.log('🚀 ~ login ~ expiredTime:', expiredTime)
 
         return {
             accessToken,
@@ -46,6 +53,11 @@ export const login = async (email, password) => {
             email: user.email
         }
     } catch (error) {
+        // Nếu là AuthFailureError thì throw nguyên bản
+        if (error instanceof AuthFailureError) {
+            throw error
+        }
+        console.error('Login error:', error)
         throw new BadRequestError('Đăng nhập thất bại')
     }
 }
@@ -93,6 +105,9 @@ export const refreshToken = async (refreshTokenString) => {
             accessToken: newAccessToken
         }
     } catch (error) {
+        if (error instanceof AuthFailureError || error instanceof NotFoundError) {
+            throw error
+        }
         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
             throw new AuthFailureError('Refresh token không hợp lệ hoặc đã hết hạn')
         }
@@ -129,6 +144,9 @@ export const logout = async (refreshTokenString) => {
             message: 'Đăng xuất thành công'
         }
     } catch (error) {
+        if (error instanceof AuthFailureError) {
+            throw error
+        }
         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
             throw new AuthFailureError('Refresh token không hợp lệ hoặc đã hết hạn')
         }
@@ -150,9 +168,31 @@ export const getCurrentUser = async (accessToken) => {
 
         return user
     } catch (error) {
+        if (error instanceof AuthFailureError || error instanceof NotFoundError) {
+            throw error
+        }
         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
             throw new AuthFailureError('Access token không hợp lệ hoặc đã hết hạn')
         }
         throw new BadRequestError('Lấy thông tin người dùng thất bại')
+    }
+}
+
+export const registerUserByEmail = async (accessToken, userData) => {
+    try {
+        // Kiểm tra accessToken OTP hợp lệ
+        const isValidOTP = await OTPService.checkValidEmailOTPAfterRegister(accessToken)
+        if (!isValidOTP) {
+            throw new AuthFailureError('Token OTP không hợp lệ hoặc đã hết hạn')
+        }
+
+        const user = await UserService.createUser(userData)
+        return user
+    } catch (error) {
+        console.error('Error in registerUserByEmail:', error)
+        if (error instanceof AuthFailureError || error instanceof ConflictRequestError) {
+            throw error
+        }
+        throw new BadRequestError('Đăng ký thất bại')
     }
 }
