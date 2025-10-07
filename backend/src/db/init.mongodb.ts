@@ -1,7 +1,7 @@
 'use strict'
 
 import mongoose from 'mongoose'
-import config from '../configs/config.app' // import db config
+import config from '../configs/mongodb.config' // import db config
 import { countConnect } from '../helpers/check.connect' // check number of connections
 import { UserService } from '../modules/index.service'
 
