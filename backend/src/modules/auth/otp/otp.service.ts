@@ -1,9 +1,8 @@
 import { OTP } from '../../index.model'
 import { randomInt } from 'crypto'
 import { OtpError } from '../../../exceptions/error.handler'
-import { isValidEmail } from '../../../utils/validate'
 import { generateAccessToken, verifyAccessToken } from '../../../utils/handleJwt'
-import { handleError } from '../../../utils/handleRes'
+import { UserService } from '../../index.service'
 
 class OTPService {
     static #genOTP6() {
@@ -11,46 +10,28 @@ class OTPService {
     }
 
     static async registerEmailOTP(email: string) {
-        try {
-            if (!isValidEmail(email)) {
-                throw new OtpError('Email không hợp lệ')
-            }
-
-            // Import động để tránh circular dependency
-            const { UserService } = await import('../../index.service')
-            const userExists = await UserService.checkIsExists({ email })
-            if (userExists) {
-                throw new OtpError('Email này đã được sử dụng, vui lòng đăng nhập hoặc sử dụng email khác')
-            }
-
-            const code = this.#genOTP6()
-
-            const doc = await OTP.findOneAndUpdate(
-                { email },
-                {
-                    code,
-                    createdAt: new Date(),
-                    isUsed: false,
-                    status: 'pending',
-                    message: ''
-                },
-                { upsert: true, new: true }
-            )
-            return doc.toObject()
-        } catch (error) {
-            handleError(error, 'Đăng ký OTP thất bại')
-            return null
+        const userExists = await UserService.checkIsExists({ email })
+        if (userExists) {
+            throw new OtpError('Email này đã được sử dụng, vui lòng đăng nhập hoặc sử dụng email khác')
         }
+
+        const code = this.#genOTP6()
+
+        const doc = await OTP.findOneAndUpdate(
+            { email },
+            {
+                code,
+                createdAt: new Date(),
+                isUsed: false,
+                status: 'pending',
+                message: ''
+            },
+            { upsert: true, new: true }
+        ).lean()
+        return doc
     }
 
     static async verifyEmailOTP(email: string, code: string) {
-        if (!isValidEmail(email)) {
-            throw new OtpError('Email không hợp lệ')
-        }
-        if (!code || code.length !== 6) {
-            throw new OtpError('Mã OTP không hợp lệ')
-        }
-
         const otpDoc = await OTP.findOne({ email, code })
         if (!otpDoc) {
             throw new OtpError('Mã OTP không hợp lệ')

@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import { hash, compare } from 'bcryptjs'
 import { IUser } from '../../types/user'
+import { comparePassword, hashPassword } from '../../utils/crypto'
 
 const userSchema = new Schema<IUser>(
     {
@@ -53,7 +53,7 @@ userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next()
 
     try {
-        this.password = await hash(this.password, 10)
+        this.password = await hashPassword(this.password)
         next()
     } catch (error) {
         next(error as Error)
@@ -62,7 +62,7 @@ userSchema.pre('save', async function (next) {
 
 // Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-    return await compare(candidatePassword, this.password)
+    return await comparePassword(candidatePassword, this.password)
 }
 
 userSchema.plugin(mongoosePaginate)

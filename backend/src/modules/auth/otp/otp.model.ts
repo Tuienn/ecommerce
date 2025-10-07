@@ -1,7 +1,8 @@
 import { Schema, model } from 'mongoose'
 import { OTP_TTL_SECONDS } from '../../../constants/common'
+import { IOTP } from '../../../types/auth'
 
-const OTPSchema = new Schema({
+const OTPSchema = new Schema<IOTP>({
     phone: { type: String, unique: true, sparse: true },
     email: { type: String, unique: true, sparse: true },
     code: { type: String, required: true, unique: true, index: true },

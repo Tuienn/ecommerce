@@ -23,7 +23,8 @@ export type OTPStatus = 'pending' | 'success' | 'failure'
  */
 export interface IOTP extends Document {
     _id: Types.ObjectId
-    email: string
+    email?: string
+    phone?: string
     code: string
     isUsed: boolean
     status: OTPStatus

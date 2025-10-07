@@ -4,14 +4,14 @@ import cors from 'cors'
 import http from 'http'
 import helmet from 'helmet'
 import 'dotenv/config'
-
 import routes from './modules/index.route'
 import { limiter } from './middlewares/rateLimiter.middleware'
 import { sanitize } from './middlewares/sanitize.middleware'
 import httpLogger from './middlewares/http.middleware'
-
 import './db/init.mongodb'
 import { checkOverLoad } from './helpers/check.connect'
+import validateBody from './middlewares/validateBody.middleware'
+import { errorMiddleware, notFoundMiddleware } from './middlewares/error.middleware'
 
 checkOverLoad()
 
@@ -36,7 +36,7 @@ if (process.env.NODE_ENV !== 'production') {
     app.use(httpLogger)
 }
 
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
     if (req.body) sanitize(req.body)
     if (req.query) sanitize(req.query)
     if (req.params) sanitize(req.params)
@@ -47,23 +47,14 @@ if (process.env.NODE_ENV === 'production') {
     app.use('/v1', limiter)
 }
 
+app.use(validateBody)
 app.use('/v1', routes)
 
-app.use((req, _res, next) => {
-    const error = new Error('Not Found Page' + req.originalUrl + ' with method ' + req.method)
-    error.status = 404
-    next(error)
-})
+// 404 handler - replace existing 404 middleware
+app.use(notFoundMiddleware)
 
-// error handler
-app.use((error, _req, res, _next) => {
-    console.error('Error::', error)
-    res.status(error.status || 500).json({
-        code: error.status || 500,
-        message: error.message || 'Internal Server Error',
-        data: null
-    })
-})
+// Global error handler - replace existing error middleware
+app.use(errorMiddleware)
 
 // const socketManager = require('./src/socket/index.socket')
 // socketManager.init(server)

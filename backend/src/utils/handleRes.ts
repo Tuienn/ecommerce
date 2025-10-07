@@ -19,7 +19,6 @@ const handleError = (err: any, message: string = ReasonPhrases.INTERNAL_SERVER_E
     if (isExpectedError(err)) {
         throw err
     }
-    console.error('Unexpected error:', err)
     throw new BadRequestError(message)
 }
 

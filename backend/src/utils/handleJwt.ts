@@ -17,11 +17,19 @@ const generateRefreshToken = (payload: any) => {
 }
 
 const verifyAccessToken = (token: string) => {
-    return verify(token, ACCESS_TOKEN_SECRET)
+    try {
+        return verify(token, ACCESS_TOKEN_SECRET)
+    } catch {
+        return null
+    }
 }
 
 const verifyRefreshToken = (token: string) => {
-    return verify(token, REFRESH_TOKEN_SECRET)
+    try {
+        return verify(token, REFRESH_TOKEN_SECRET)
+    } catch {
+        return null
+    }
 }
 
 export { generateAccessToken, generateRefreshToken, verifyAccessToken, verifyRefreshToken }

@@ -1,89 +1,100 @@
 import AuthService from './auth.service'
 import { handleSuccess } from '../../utils/handleRes'
 import { BadRequestError } from '../../exceptions/error.handler'
-import { isValidEmail, isValidPassword } from '../../utils/validate'
-import { Request, Response } from 'express'
+import { isValidEmail, isValidPassword, isValidPhoneNumber } from '../../utils/validate'
+import { Request, Response, NextFunction } from 'express'
+import { invalidDataField, missingDataField } from '../../constants/text'
 
 class AuthController {
-    static async login(req: Request, res: Response) {
-        const { email, password } = req.body
+    static async loginByEmail(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { email, password } = req.body
 
-        if (!email || !password) {
-            throw new BadRequestError('Thiếu thông tin đăng nhập')
-        }
+            if (!email || !password) {
+                throw new BadRequestError(missingDataField('email hoặc mật khẩu'))
+            }
 
-        if (!isValidEmail(email)) {
-            throw new BadRequestError('Email không hợp lệ')
-        }
+            if (!isValidEmail(email)) throw new BadRequestError(invalidDataField('email'))
+            if (!isValidPassword(password)) throw new BadRequestError(invalidDataField('mật khẩu'))
 
-        if (!isValidPassword(password)) {
-            throw new BadRequestError('Mật khẩu không hợp lệ')
-        }
-
-        const data = await AuthService.login(email, password)
-
-        return handleSuccess(res, data, 'Đăng nhập thành công')
-    }
-
-    static async refreshToken(req: Request, res: Response) {
-        const { refreshToken } = req.body
-
-        if (!refreshToken) {
-            throw new BadRequestError('Thiếu thông tin refreshtoken')
-        }
-
-        const data = await AuthService.refreshToken(refreshToken)
-
-        return handleSuccess(res, data, 'Làm mới token thành công')
-    }
-
-    static async logout(req: Request, res: Response) {
-        const { refreshToken } = req.body
-
-        if (!refreshToken) {
-            throw new BadRequestError('Thiếu thông tin refreshtoken')
-        }
-
-        const result = await AuthService.logout(refreshToken)
-
-        if (!result) {
+            const data = await AuthService.loginByEmail(email, password)
+            return handleSuccess(res, data, 'Đăng nhập thành công')
+        } catch (error) {
+            next(error)
             return
         }
-
-        return handleSuccess(res, null, result.message)
     }
 
-    static async getCurrentUser(req: Request, res: Response) {
-        const authHeader = req.headers['authorization']
-        const token = authHeader && authHeader.split(' ')[1]
+    static async refreshToken(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { refreshToken } = req.body
 
-        if (!token) {
-            throw new BadRequestError('Thiếu access token')
+            if (!refreshToken) {
+                throw new BadRequestError(missingDataField('refreshToken'))
+            }
+
+            const data = await AuthService.refreshToken(refreshToken)
+            return handleSuccess(res, data, 'Làm mới token thành công')
+        } catch (error) {
+            next(error)
+            return
         }
-
-        const userDoc = await AuthService.getCurrentUser(token)
-        const user = userDoc.toObject ? userDoc.toObject() : userDoc
-
-        return handleSuccess(res, user, 'Lấy thông tin người dùng thành công')
     }
 
-    static async registerUserByEmail(req: Request, res: Response) {
-        const authHeader = req.headers['authorization']
-        const accessToken = authHeader && authHeader.split(' ')[1]
+    static async logout(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { refreshToken } = req.body
 
-        if (!accessToken) {
-            throw new BadRequestError('Thiếu token xác thực OTP')
+            if (!refreshToken) {
+                throw new BadRequestError(missingDataField('refreshToken'))
+            }
+
+            const result = await AuthService.logout(refreshToken)
+            if (!result) {
+                return handleSuccess(res, null, 'Đăng xuất không thành công hoặc token không hợp lệ')
+            }
+
+            return handleSuccess(res, null, result.message)
+        } catch (error) {
+            next(error)
+            return
         }
+    }
 
-        const { name, email, password, phone } = req.body
-
-        if (!name || !email || !password || !phone) {
-            throw new BadRequestError('Thiếu thông tin bắt buộc: tên, email, mật khẩu, số điện thoại')
+    static async getCurrentUser(req: Request, res: Response, next: NextFunction) {
+        try {
+            return handleSuccess(res, req.user, 'Lấy thông tin người dùng thành công')
+        } catch (error) {
+            next(error)
+            return
         }
+    }
 
-        const userData = await AuthService.registerUserByEmail(accessToken, req.body)
+    static async registerUserByEmail(req: Request, res: Response, next: NextFunction) {
+        try {
+            const authHeader = req.headers['authorization']
+            const accessToken = authHeader && authHeader.split(' ')[1]
 
-        return handleSuccess(res, userData, 'Đăng ký người dùng thành công')
+            if (!accessToken) {
+                throw new BadRequestError(missingDataField('token xác thực OTP'))
+            }
+
+            const { name, email, password, phone } = req.body
+
+            if (!name || !email || !password || !phone) {
+                throw new BadRequestError(missingDataField('tên, email, mật khẩu hoặc số điện thoại'))
+            }
+
+            if (!isValidEmail(email)) throw new BadRequestError(invalidDataField('email'))
+            if (!isValidPassword(password)) throw new BadRequestError(invalidDataField('mật khẩu'))
+            if (!isValidPhoneNumber(phone)) throw new BadRequestError(invalidDataField('số điện thoại'))
+
+            const userData = await AuthService.registerUserByEmail(accessToken, req.body)
+            return handleSuccess(res, userData, 'Đăng ký người dùng thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
     }
 }
 

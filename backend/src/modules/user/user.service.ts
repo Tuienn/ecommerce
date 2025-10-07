@@ -1,8 +1,10 @@
+import { existedDataField } from './../../constants/text'
 import { User } from '../index.model'
-import { hash } from 'bcryptjs'
-import { NotFoundError, ConflictRequestError } from '../../exceptions/error.handler'
+import { ConflictRequestError, NotFoundError } from '../../exceptions/error.handler'
 import { IUser } from '../../types/user'
 import { RootFilterQuery } from 'mongoose'
+import { AUTH } from '../../constants/text'
+import { hashPassword } from '../../utils/crypto'
 
 const { DEFAULT_EMAIL_ADMIN, DEFAULT_PASSWORD_ADMIN } = process.env
 
@@ -16,7 +18,7 @@ class UserService {
                 email: DEFAULT_EMAIL_ADMIN,
                 password: DEFAULT_PASSWORD_ADMIN,
                 role: 'admin',
-                isActive: true
+                phone: '0942029135'
             })
 
             console.log('Default admin user created successfully')
@@ -42,9 +44,14 @@ class UserService {
     static async createUser(data: IUser) {
         const { name, email, password, role, phone } = data
 
-        const existingUser = await User.findOne({ email })
+        const existingUser = await this.checkIsExists({ email })
         if (existingUser) {
-            throw new ConflictRequestError('Email này đã được sử dụng')
+            throw new ConflictRequestError(existedDataField('email'))
+        }
+
+        const phoneNumber = await this.checkIsExists({ phone })
+        if (phoneNumber) {
+            throw new ConflictRequestError(existedDataField('số điện thoại'))
         }
 
         const newUser = await User.create({
@@ -55,8 +62,7 @@ class UserService {
             role
         })
 
-        const userResponse = newUser.toObject()
-        const { password: _, ...userWithoutPassword } = userResponse
+        const { password: _, ...userWithoutPassword } = newUser.toObject()
 
         return userWithoutPassword
     }
@@ -65,68 +71,62 @@ class UserService {
         const user = await User.findById(userId).select('-password')
 
         if (!user) {
-            throw new NotFoundError('Không tìm thấy người dùng')
+            throw new NotFoundError(AUTH.USER_NOT_FOUND)
         }
 
-        const obj = user.toObject()
-
-        return obj
+        return user
     }
 
     static async updateUser(userId: string, data: IUser) {
-        const { email, role, password, isActive, name } = data
+        const { email, role, password, isActive, name, phone } = data
 
-        const user = await User.findById(userId)
-        if (!user) {
-            throw new NotFoundError('Không tìm thấy người dùng')
+        const user = (await this.getUserById(userId)).toObject()
+        if (user.role === 'admin' && user.email === DEFAULT_EMAIL_ADMIN) {
+            throw new ConflictRequestError('Không thể cập nhật tài khoản admin chính')
         }
 
         if (email && email !== user.email) {
-            const existingUser = await User.findOne({ email })
+            const existingUser = await this.checkIsExists({ email })
             if (existingUser) {
-                throw new ConflictRequestError('Email này đã được sử dụng')
+                throw new ConflictRequestError(existedDataField('email'))
             }
         }
 
-        const updateData: Partial<IUser> = {}
-        if (email) updateData.email = email
-        if (name) updateData.name = name
-        if (role) updateData.role = role
+        if (email) user.email = email
+        if (name) user.name = name
+        if (role) user.role = role
+        if (phone) user.phone = phone
         if (password) {
-            updateData.password = await hash(password, 10)
+            user.password = hashPassword(password)
         }
-        if (typeof isActive === 'boolean') updateData.isActive = isActive
+        if (typeof isActive === 'boolean') user.isActive = isActive
 
-        const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select('-password')
+        user.save()
 
-        if (!updatedUser) {
-            throw new NotFoundError('Không tìm thấy người dùng')
-        }
-        const obj = updatedUser.toObject()
-
-        return obj
+        return user.toObject()
     }
 
     static async deleteUser(userId: string) {
-        const user = await User.findById(userId)
-        if (!user) {
-            throw new NotFoundError('Không tìm thấy người dùng')
+        const user = (await this.getUserById(userId)).toObject()
+
+        if (user.role === 'admin' && user.email === DEFAULT_EMAIL_ADMIN) {
+            throw new ConflictRequestError('Không thể xóa tài khoản admin chính')
         }
 
         await User.findByIdAndDelete(userId)
-        return { message: 'Xóa người dùng thành công' }
+        return true
     }
 
     static async setUserActive(userId: string, isActive: boolean) {
-        const user = await User.findById(userId)
-        if (!user) throw new NotFoundError('Không tìm thấy người dùng')
+        const user = (await this.getUserById(userId)).toObject()
+
         if (user.role === 'admin' && user.email === DEFAULT_EMAIL_ADMIN) {
             throw new ConflictRequestError('Không thể vô hiệu hoá tài khoản admin chính')
         }
+
         user.isActive = !!isActive
         await user.save()
-        const obj = user.toObject()
-        const { password, ...rest } = obj
+        const { password, ...rest } = user.toObject()
 
         return rest
     }

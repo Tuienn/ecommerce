@@ -1,4 +1,3 @@
-import { Method } from 'axios'
 import { Request, Response, NextFunction } from 'express'
 
 const formatRequestBody = (req: Request) => {
@@ -21,32 +20,84 @@ const formatRequestBody = (req: Request) => {
     return body
 }
 
-const formatFiles = (files: Express.Multer.File[] | Express.Multer.File) => {
+type MulterFilesInput =
+    | Express.Multer.File
+    | Express.Multer.File[]
+    | { [fieldname: string]: Express.Multer.File[] }
+    | undefined
+
+const formatFiles = (files: MulterFilesInput) => {
     if (!files) return null
 
+    // Multiple files (array) - e.g., multer.array() / multer.any()
     if (Array.isArray(files)) {
         return files.map((file) => ({
             fieldname: file.fieldname,
-            filename: file.originalname || file.filename,
+            // filename may not exist in some storage engines, fallback to originalname
+            filename: file.originalname || (file as any).filename,
             size: `${(file.size / 1024).toFixed(2)} KB`,
             mimetype: file.mimetype
         }))
     }
 
-    // Single file
-    return {
-        fieldname: files.fieldname,
-        filename: files.originalname || files.filename,
-        size: `${(files.size / 1024).toFixed(2)} KB`,
-        mimetype: files.mimetype
+    // Single file (multer.single())
+    if (typeof (files as any).fieldname === 'string' && typeof (files as any).mimetype === 'string') {
+        const file = files as Express.Multer.File
+        return {
+            fieldname: file.fieldname,
+            filename: file.originalname || (file as any).filename,
+            size: `${(file.size / 1024).toFixed(2)} KB`,
+            mimetype: file.mimetype
+        }
     }
+
+    // Object mapping (multer.fields())
+    const record = files as Record<string, Express.Multer.File[]>
+    const result: Array<{ fieldname: string; filename: string; size: string; mimetype: string }> = []
+    for (const key of Object.keys(record)) {
+        const list = record[key] || []
+        for (const file of list) {
+            result.push({
+                fieldname: file.fieldname,
+                filename: file.originalname || (file as any).filename,
+                size: `${(file.size / 1024).toFixed(2)} KB`,
+                mimetype: file.mimetype
+            })
+        }
+    }
+    return result
 }
 
 const formatResponse = (data: any) => {
     if (!data) return null
 
-    // Nếu response quá lớn, chỉ show preview
-    const dataStr = JSON.stringify(data)
+    let responseData = data
+
+    // Nếu response có cấu trúc {code, message, data}, format đặc biệt
+    try {
+        const parsed = typeof data === 'string' ? JSON.parse(data) : data
+        if (parsed && typeof parsed === 'object' && 'code' in parsed && 'message' in parsed) {
+            responseData = {
+                code: parsed.code,
+                message: parsed.message,
+                data: parsed.data
+                    ? JSON.stringify(parsed.data).length > 500
+                        ? {
+                              preview: JSON.stringify(parsed.data).substring(0, 300) + '...',
+                              size: `${(JSON.stringify(parsed.data).length / 1024).toFixed(2)} KB`,
+                              truncated: true
+                          }
+                        : parsed.data
+                    : parsed.data
+            }
+            return responseData
+        }
+    } catch (e) {
+        // Nếu không parse được, tiếp tục với logic cũ
+    }
+
+    // Logic cũ cho các response khác
+    const dataStr = JSON.stringify(responseData)
     if (dataStr.length > 1000) {
         return {
             preview: dataStr.substring(0, 500) + '...',
@@ -55,7 +106,7 @@ const formatResponse = (data: any) => {
         }
     }
 
-    return data
+    return responseData
 }
 
 const getColorByStatus = (status: number) => {

@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose'
+import { IAuth } from '../../types/auth'
 
-const AuthSchema = new Schema({
+const AuthSchema = new Schema<IAuth>({
     user: {
         type: Schema.Types.ObjectId,
         required: true,
