@@ -5,7 +5,7 @@ import mongoose from 'mongoose'
 interface CustomError extends Error {
     status?: number
     statusCode?: number
-    code?: number
+    code?: number | string
 }
 
 /**
@@ -17,13 +17,38 @@ export const errorMiddleware = (error: CustomError, req: Request, res: Response,
         message: error.message,
         name: error.name,
         stack: error.stack,
+        code: error.code,
         url: req.originalUrl,
         method: req.method,
         timestamp: new Date().toISOString()
     })
 
-    let statusCode = error.statusCode || error.code || error.status || StatusCodes.INTERNAL_SERVER_ERROR
+    let statusCode: number =
+        typeof error.statusCode === 'number'
+            ? error.statusCode
+            : typeof error.code === 'number'
+              ? error.code
+              : StatusCodes.INTERNAL_SERVER_ERROR
+
     let message: string = error.message || ReasonPhrases.INTERNAL_SERVER_ERROR
+
+    /* ---------------------- Multer Error Handling ---------------------- */
+    if (typeof error.code === 'string' && error.code.startsWith('LIMIT')) {
+        statusCode = StatusCodes.BAD_REQUEST
+        switch (error.code) {
+            case 'LIMIT_FILE_SIZE':
+                message = 'Kích thước file vượt quá giới hạn cho phép'
+                break
+            case 'LIMIT_FILE_COUNT':
+                message = 'Số lượng file upload vượt quá giới hạn'
+                break
+            case 'LIMIT_UNEXPECTED_FILE':
+                message = 'Tên field upload không hợp lệ (LIMIT_UNEXPECTED_FILE)'
+                break
+            default:
+                message = 'Lỗi upload file'
+        }
+    }
 
     /* ---------------------- Mongoose CastError ---------------------- */
     if (error instanceof mongoose.Error.CastError && error.path === '_id') {
@@ -44,6 +69,11 @@ export const errorMiddleware = (error: CustomError, req: Request, res: Response,
         statusCode = StatusCodes.CONFLICT
         const fields = Object.keys((error as any).keyValue).join(', ')
         message = `Giá trị trùng lặp cho các trường: ${fields}`
+    }
+
+    /* ---------------------- Đảm bảo statusCode là số ---------------------- */
+    if (isNaN(statusCode) || typeof statusCode !== 'number') {
+        statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     }
 
     /* ---------------------- Final response ---------------------- */

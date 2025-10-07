@@ -52,7 +52,6 @@ app.use('/v1', routes)
 
 // 404 handler - replace existing 404 middleware
 app.use(notFoundMiddleware)
-
 // Global error handler - replace existing error middleware
 app.use(errorMiddleware)
 
