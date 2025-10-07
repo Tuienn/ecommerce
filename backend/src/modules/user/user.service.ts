@@ -67,6 +67,38 @@ class UserService {
         return userWithoutPassword
     }
 
+    static async getAllUsers(query?: { page?: number; limit?: number; isActive?: boolean; role?: string }) {
+        const page = query?.page || 1
+        const limit = query?.limit || 10
+        const filter: any = {}
+
+        if (typeof query?.isActive === 'boolean') {
+            filter.isActive = query.isActive
+        }
+
+        if (query?.role) {
+            filter.role = query.role
+        }
+
+        const users = await User.find(filter)
+            .select('-password')
+            .limit(limit)
+            .skip((page - 1) * limit)
+            .sort({ createdAt: -1 })
+
+        const total = await User.countDocuments(filter)
+
+        return {
+            data: users,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
+        }
+    }
+
     static async getUserById(userId: string) {
         const user = await User.findById(userId).select('-password')
 

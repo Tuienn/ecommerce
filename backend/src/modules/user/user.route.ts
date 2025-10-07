@@ -9,6 +9,7 @@ router.use(authenticateToken)
 router.use(authorize('admin'))
 
 router.post('', asyncHandler(UserController.createUser))
+router.get('', asyncHandler(UserController.getAllUsers))
 router.get('/:_id', asyncHandler(UserController.getUserById))
 router.put('/:_id', asyncHandler(UserController.updateUserById))
 router.delete('/:_id', asyncHandler(UserController.deleteUserById))

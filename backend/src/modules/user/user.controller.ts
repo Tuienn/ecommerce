@@ -28,6 +28,21 @@ class UserController {
         }
     }
 
+    static async getAllUsers(req: Request, res: Response, next: NextFunction) {
+        try {
+            const page = req.query.page ? parseInt(req.query.page as string) : 1
+            const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
+            const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined
+            const role = req.query.role as string | undefined
+
+            const data = await UserService.getAllUsers({ page, limit, isActive, role })
+            return handleSuccess(res, data, 'Lấy danh sách người dùng thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
     static async getUserById(req: Request, res: Response, next: NextFunction) {
         try {
             const targetId = req.params._id
