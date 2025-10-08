@@ -1,7 +1,7 @@
 import { Product, Category } from '../index.model'
 import { NotFoundError, BadRequestError, ConflictRequestError } from '../../exceptions/error.handler'
 import { existedDataField } from '../../constants/text'
-import { deleteImagesFromCloudinary } from '../../helpers/cloudinary'
+import { saveImagesToDestroyedCollection } from '../../helpers/cloudinary'
 
 class ProductService {
     static async createProduct(data: {
@@ -200,7 +200,7 @@ class ProductService {
             throw new BadRequestError('Số lượng tồn kho không được âm')
         }
 
-        // Xử lý cập nhật ảnh - xóa ảnh cũ nếu có ảnh mới
+        // Xử lý cập nhật ảnh - lưu ảnh cũ vào destroyed-img nếu có ảnh mới
         if (data.images) {
             const oldImages = product.images || []
             const newImages = data.images
@@ -208,16 +208,18 @@ class ProductService {
             // Tìm những ảnh cũ không còn trong danh sách mới
             const imagesToDelete = oldImages.filter((oldImg) => !newImages.includes(oldImg))
 
-            // Xóa ảnh cũ từ Cloudinary
+            // Lưu ảnh cũ vào destroyed-img collection
             if (imagesToDelete.length > 0) {
                 try {
-                    const deleteResult = await deleteImagesFromCloudinary(imagesToDelete)
+                    const saveResult = await saveImagesToDestroyedCollection(imagesToDelete, 'product_updated')
 
-                    if (!deleteResult) {
-                        console.warn(`Some old images may not be deleted from Cloudinary for product: ${productId}`)
+                    if (!saveResult) {
+                        console.warn(
+                            `Some old images may not be saved to destroyed collection for product: ${productId}`
+                        )
                     }
                 } catch (error) {
-                    console.error('Error deleting old images from Cloudinary:', error)
+                    console.error('Error saving old images to destroyed collection:', error)
                 }
             }
 
@@ -247,15 +249,15 @@ class ProductService {
         // Kiểm tra product có tồn tại không và lấy thông tin product
         const product = await this.getProductById(productId)
 
-        // Xóa ảnh từ Cloudinary trước khi xóa product
+        // Lưu ảnh vào destroyed-img collection trước khi xóa product
         if (product.images && product.images.length > 0) {
             try {
-                const deleteResult = await deleteImagesFromCloudinary(product.images)
-                if (!deleteResult) {
-                    console.warn(`Some images may not be deleted from Cloudinary for product: ${productId}`)
+                const saveResult = await saveImagesToDestroyedCollection(product.images, 'product_deleted')
+                if (!saveResult) {
+                    console.warn(`Some images may not be saved to destroyed collection for product: ${productId}`)
                 }
             } catch (error) {
-                console.error('Error deleting images from Cloudinary:', error)
+                console.error('Error saving images to destroyed collection:', error)
                 // Không throw error để không cản trở việc xóa product
             }
         }
