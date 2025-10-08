@@ -8,7 +8,17 @@ import { StatusCodes } from '../../constants/httpStatusCode'
 class ProductController {
     // Helper: Parse và validate product fields chung
     private static parseProductFields(body: any, isFormData: boolean = false) {
-        const { name, description, categoryId, basePrice, discountPercent, unit, stock, isActive, isFeatured } = body
+        const {
+            name,
+            description,
+            categoryId,
+            basePrice,
+            discountPercent,
+            unit,
+            stock,
+            isActive = true,
+            isFeatured
+        } = body
 
         // Validate name nếu có
         if (name !== undefined) {
@@ -50,10 +60,7 @@ class ProductController {
         }
 
         // Parse boolean fields
-        let parsedIsActive: boolean | undefined
-        if (isActive !== undefined) {
-            parsedIsActive = isFormData ? isActive === 'true' || isActive === true : isActive
-        }
+        const parsedIsActive = isActive === 'true' || isActive === true
 
         let parsedIsFeatured: boolean | undefined
         if (isFeatured !== undefined) {
@@ -111,8 +118,17 @@ class ProductController {
     }
     static async createProduct(req: Request, res: Response, next: NextFunction) {
         try {
-            const { name, description, categoryId, basePrice, discountPercent, unit, stock, isActive, isFeatured } =
-                req.body
+            const {
+                name,
+                description,
+                categoryId,
+                basePrice,
+                discountPercent,
+                unit,
+                stock,
+                isActive = true,
+                isFeatured
+            } = req.body
 
             // Validate required fields
             if (!name || !categoryId || !basePrice) {
@@ -154,7 +170,7 @@ class ProductController {
                 images.push(...req.files.map((file: any) => file.path))
             }
 
-            // Parse boolean fields (form-data trả về string)
+            // Parse boolean fields (form-data trả về string)\
             const parsedIsActive = isActive === 'true' || isActive === true
             const parsedIsFeatured = isFeatured === 'true' || isFeatured === true
 

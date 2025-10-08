@@ -46,6 +46,7 @@ coverage/
 
 # VSCode settings
 .vscode/
+.cursor/
 
 # Mac system files
 .DS_Store

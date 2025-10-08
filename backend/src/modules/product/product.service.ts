@@ -1,6 +1,7 @@
 import { Product, Category } from '../index.model'
 import { NotFoundError, BadRequestError, ConflictRequestError } from '../../exceptions/error.handler'
 import { existedDataField } from '../../constants/text'
+import { deleteImagesFromCloudinary } from '../../helpers/cloudinary'
 
 class ProductService {
     static async createProduct(data: {
@@ -199,7 +200,31 @@ class ProductService {
             throw new BadRequestError('Số lượng tồn kho không được âm')
         }
 
-        // Cập nhật các trường
+        // Xử lý cập nhật ảnh - xóa ảnh cũ nếu có ảnh mới
+        if (data.images) {
+            const oldImages = product.images || []
+            const newImages = data.images
+
+            // Tìm những ảnh cũ không còn trong danh sách mới
+            const imagesToDelete = oldImages.filter((oldImg) => !newImages.includes(oldImg))
+
+            // Xóa ảnh cũ từ Cloudinary
+            if (imagesToDelete.length > 0) {
+                try {
+                    const deleteResult = await deleteImagesFromCloudinary(imagesToDelete)
+
+                    if (!deleteResult) {
+                        console.warn(`Some old images may not be deleted from Cloudinary for product: ${productId}`)
+                    }
+                } catch (error) {
+                    console.error('Error deleting old images from Cloudinary:', error)
+                }
+            }
+
+            product.images = newImages
+        }
+
+        // Cập nhật các trường khác
         if (data.name) product.name = data.name
         if (data.description !== undefined) product.description = data.description
         if (data.categoryId) product.categoryId = data.categoryId as any
@@ -207,7 +232,6 @@ class ProductService {
         if (data.discountPercent !== undefined) product.discountPercent = data.discountPercent
         if (data.unit) product.unit = data.unit as any
         if (data.stock !== undefined) product.stock = data.stock
-        if (data.images) product.images = data.images
         if (typeof data.isActive === 'boolean') product.isActive = data.isActive
         if (typeof data.isFeatured === 'boolean') product.isFeatured = data.isFeatured
 
@@ -220,8 +244,21 @@ class ProductService {
     }
 
     static async deleteProduct(productId: string) {
-        // Kiểm tra product có tồn tại không
-        await this.getProductById(productId)
+        // Kiểm tra product có tồn tại không và lấy thông tin product
+        const product = await this.getProductById(productId)
+
+        // Xóa ảnh từ Cloudinary trước khi xóa product
+        if (product.images && product.images.length > 0) {
+            try {
+                const deleteResult = await deleteImagesFromCloudinary(product.images)
+                if (!deleteResult) {
+                    console.warn(`Some images may not be deleted from Cloudinary for product: ${productId}`)
+                }
+            } catch (error) {
+                console.error('Error deleting images from Cloudinary:', error)
+                // Không throw error để không cản trở việc xóa product
+            }
+        }
 
         await Product.findByIdAndDelete(productId)
 
