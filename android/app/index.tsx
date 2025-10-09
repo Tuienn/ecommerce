@@ -1,7 +1,5 @@
-import { Text } from '@/components/ui/text'
 import { useAuth } from '@/hooks/use-auth'
-import { Redirect, Stack } from 'expo-router'
-import { View } from 'react-native'
+import { Redirect } from 'expo-router'
 
 export default function Screen() {
     const { isAuth } = useAuth()
@@ -19,12 +17,6 @@ export default function Screen() {
         return <Redirect href='/(auth)/(login)/login-by-email' />
     }
 
-    return (
-        <>
-            <Stack.Screen />
-            <View className='flex-1 items-center justify-center gap-8 p-4'>
-                <Text>Trang chủ</Text>
-            </View>
-        </>
-    )
+    // If user is authenticated, redirect to main tabs with home as default
+    return <Redirect href='/main/home' />
 }

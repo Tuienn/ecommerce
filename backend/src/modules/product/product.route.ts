@@ -10,6 +10,7 @@ const router: RouterType = Router()
 // Public routes
 router.get('', asyncHandler(ProductController.getAllProducts))
 router.get('/search', asyncHandler(ProductController.searchProducts))
+router.get('/simple-search', asyncHandler(ProductController.simpleSearchProducts))
 router.get('/:_id', asyncHandler(ProductController.getProductById))
 
 // Protected routes - Admin only

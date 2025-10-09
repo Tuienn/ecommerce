@@ -258,6 +258,54 @@ class ProductController {
         }
     }
 
+    static async simpleSearchProducts(req: Request, res: Response, next: NextFunction) {
+        try {
+            const page = req.query.page ? parseInt(req.query.page as string) : 1
+            const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
+            const name = req.query.name as string | undefined
+            const isFeatured =
+                req.query.isFeatured === 'true' ? true : req.query.isFeatured === 'false' ? false : undefined
+
+            // Parse categoryIds - có thể là array hoặc string "id1,id2"
+            let categoryIds: string[] | undefined
+            if (req.query.categoryIds) {
+                if (typeof req.query.categoryIds === 'string') {
+                    // Nếu là string "id1,id2" thì split
+                    categoryIds = req.query.categoryIds.split(',').map((id) => id.trim())
+                } else if (Array.isArray(req.query.categoryIds)) {
+                    // Nếu đã là array
+                    categoryIds = req.query.categoryIds as string[]
+                }
+            }
+
+            // Parse sortPrice
+            let sortPrice: 'asc' | 'desc' | undefined
+            if (req.query.sortPrice === 'asc' || req.query.sortPrice === 'desc') {
+                sortPrice = req.query.sortPrice
+            }
+
+            // Parse sortDiscount
+            let sortDiscount: 'asc' | 'desc' | undefined
+            if (req.query.sortDiscount === 'asc' || req.query.sortDiscount === 'desc') {
+                sortDiscount = req.query.sortDiscount
+            }
+
+            const data = await ProductService.searchProducts({
+                page,
+                limit,
+                name,
+                categoryIds,
+                isFeatured,
+                sortPrice,
+                sortDiscount
+            })
+            return handleSuccess(res, data, 'Tìm kiếm sản phẩm thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
     static async getProductById(req: Request, res: Response, next: NextFunction) {
         try {
             const productId = req.params._id

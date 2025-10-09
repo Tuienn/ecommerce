@@ -1,9 +1,10 @@
 import * as SecureStore from 'expo-secure-store'
 import { Platform } from 'react-native'
 
-// Web fallback using localStorage
+// Xác định đang chạy web hay native
 const isWeb = Platform.OS === 'web'
 
+// Web fallback using localStorage
 const webStorage = {
     setItem: (key: string, value: string) => {
         if (typeof window !== 'undefined') {
@@ -23,69 +24,61 @@ const webStorage = {
     }
 }
 
-export const saveRefreshToken = async (token: string) => {
+/**
+ * Hàm lưu dữ liệu
+ */
+export const saveDataStorage = async (key: string, value: string) => {
     try {
         if (isWeb) {
-            webStorage.setItem('refreshToken', token)
+            webStorage.setItem(key, value)
         } else {
-            await SecureStore.setItemAsync('refreshToken', token)
+            await SecureStore.setItemAsync(key, value)
         }
     } catch (error) {
-        console.error('Error saving refresh token:', error)
+        console.error(`Error saving data [${key}]:`, error)
         throw error
     }
 }
 
-export const getRefreshToken = async (): Promise<string | null> => {
+/**
+ * Hàm lấy dữ liệu
+ */
+export const getDataStorage = async (key: string): Promise<string | null> => {
     try {
         if (isWeb) {
-            return webStorage.getItem('refreshToken')
+            return webStorage.getItem(key)
         } else {
-            return await SecureStore.getItemAsync('refreshToken')
+            return await SecureStore.getItemAsync(key)
         }
     } catch (error) {
-        console.error('Error getting refresh token:', error)
+        console.error(`Error getting data [${key}]:`, error)
         return null
     }
 }
 
-export const saveAccessToken = async (token: string) => {
+/**
+ * Hàm xóa dữ liệu
+ */
+export const removeDataStorage = async (key: string) => {
     try {
         if (isWeb) {
-            webStorage.setItem('accessToken', token)
+            webStorage.removeItem(key)
         } else {
-            await SecureStore.setItemAsync('accessToken', token)
+            await SecureStore.deleteItemAsync(key)
         }
     } catch (error) {
-        console.error('Error saving access token:', error)
-        throw error
+        console.error(`Error removing data [${key}]:`, error)
     }
 }
 
-export const getAccessToken = async (): Promise<string | null> => {
-    try {
-        if (isWeb) {
-            return webStorage.getItem('accessToken')
-        } else {
-            return await SecureStore.getItemAsync('accessToken')
-        }
-    } catch (error) {
-        console.error('Error getting access token:', error)
-        return null
-    }
-}
+// ================== Token-specific helpers ================== //
+
+export const saveAccessToken = (token: string) => saveDataStorage('accessToken', token)
+export const getAccessToken = () => getDataStorage('accessToken')
+export const saveRefreshToken = (token: string) => saveDataStorage('refreshToken', token)
+export const getRefreshToken = () => getDataStorage('refreshToken')
 
 export const clearAuthToken = async () => {
-    try {
-        if (isWeb) {
-            webStorage.removeItem('refreshToken')
-            webStorage.removeItem('accessToken')
-        } else {
-            await SecureStore.deleteItemAsync('refreshToken')
-            await SecureStore.deleteItemAsync('accessToken')
-        }
-    } catch (error) {
-        console.error('Error clearing auth tokens:', error)
-        // Don't throw here as this is cleanup
-    }
+    await removeDataStorage('accessToken')
+    await removeDataStorage('refreshToken')
 }

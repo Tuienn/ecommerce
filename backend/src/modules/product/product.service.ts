@@ -152,6 +152,63 @@ class ProductService {
         }
     }
 
+    static async simpleSearchProducts(query?: {
+        name?: string
+        categoryIds?: string[]
+        isFeatured?: boolean
+        sortPrice?: 'asc' | 'desc'
+        sortDiscount?: 'asc' | 'desc'
+        page?: number
+        limit?: number
+    }) {
+        const page = query?.page || 1
+        const limit = query?.limit || 10
+        const filter: any = { isActive: true } // Chỉ tìm sản phẩm đang active
+
+        // Tìm theo tên (regex, case-insensitive)
+        if (query?.name) {
+            filter.name = { $regex: query.name, $options: 'i' }
+        }
+
+        // Lọc theo nhiều danh mục
+        if (query?.categoryIds && query.categoryIds.length > 0) {
+            filter.categoryId = { $in: query.categoryIds }
+        }
+
+        // Lọc theo nổi bật
+        if (typeof query?.isFeatured === 'boolean') {
+            filter.isFeatured = query.isFeatured
+        }
+
+        // Xác định sort
+        let sort: any = { createdAt: -1 } // Mặc định sort theo mới nhất
+
+        if (query?.sortPrice) {
+            sort = { price: query.sortPrice === 'asc' ? 1 : -1 }
+        } else if (query?.sortDiscount) {
+            sort = { discountPercent: query.sortDiscount === 'asc' ? 1 : -1 }
+        }
+
+        const products = await Product.find(filter)
+            .select('name basePrice price discountPercent images isFeatured soldCount')
+            .populate('categoryId', 'name isActive')
+            .limit(limit)
+            .skip((page - 1) * limit)
+            .sort(sort)
+
+        const total = await Product.countDocuments(filter)
+
+        return {
+            data: products,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
+        }
+    }
+
     static async getProductById(productId: string) {
         const product = await Product.findById(productId).populate('categoryId', 'name isActive')
 
