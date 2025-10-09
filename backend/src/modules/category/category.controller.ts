@@ -55,13 +55,9 @@ class CategoryController {
         }
     }
 
-    static async getAllCategories(req: Request, res: Response, next: NextFunction) {
+    static async getAllCategories(_req: Request, res: Response, next: NextFunction) {
         try {
-            const page = req.query.page ? parseInt(req.query.page as string) : 1
-            const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
-            const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined
-
-            const data = await CategoryService.getAllCategories({ page, limit, isActive })
+            const data = await CategoryService.getAllCategories()
             return handleSuccess(res, data, 'Lấy danh sách danh mục thành công')
         } catch (error) {
             next(error)

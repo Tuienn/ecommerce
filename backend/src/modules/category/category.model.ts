@@ -1,5 +1,4 @@
 import { Schema, model } from 'mongoose'
-import mongoosePaginate from 'mongoose-paginate-v2'
 import { ICategory } from '../../types/category'
 
 const categorySchema = new Schema<ICategory>(
@@ -22,7 +21,6 @@ const categorySchema = new Schema<ICategory>(
     }
 )
 
-categorySchema.plugin(mongoosePaginate)
 const Category = model<ICategory>('Category', categorySchema)
 
 export default Category

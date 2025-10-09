@@ -65,31 +65,10 @@ class CategoryService {
         }
     }
 
-    static async getAllCategories(query?: { page?: number; limit?: number; isActive?: boolean }) {
-        const page = query?.page || 1
-        const limit = query?.limit || 10
-        const filter: any = {}
+    static async getAllCategories() {
+        const categories = await Category.find({ isActive: true }).sort({ createdAt: -1 })
 
-        if (typeof query?.isActive === 'boolean') {
-            filter.isActive = query.isActive
-        }
-
-        const categories = await Category.find(filter)
-            .limit(limit)
-            .skip((page - 1) * limit)
-            .sort({ createdAt: -1 })
-
-        const total = await Category.countDocuments(filter)
-
-        return {
-            data: categories,
-            pagination: {
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / limit)
-            }
-        }
+        return categories
     }
 
     static async getCategoryById(categoryId: string) {
