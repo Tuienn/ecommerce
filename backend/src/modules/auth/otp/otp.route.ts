@@ -4,7 +4,7 @@ import asyncHandler from '../../../helpers/asyncHandler'
 
 const router: RouterType = Router()
 
-router.post('/register-email-otp', asyncHandler(OTPController.registerEmailOTP))
-router.post('/verify-email-otp', asyncHandler(OTPController.verifyEmailOTP))
+router.post('/register/email', asyncHandler(OTPController.registerEmailOTP))
+router.post('/verify/email', asyncHandler(OTPController.verifyEmailOTP))
 
 export default router

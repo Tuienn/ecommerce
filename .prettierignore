@@ -19,3 +19,6 @@ docs/**/*.md
 
 .vscode/
 .cursor/
+
+# Shadcn ui
+android/components/ui/
