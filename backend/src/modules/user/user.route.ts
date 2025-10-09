@@ -5,6 +5,20 @@ import authenticateToken from '../../middlewares/authen.middleware'
 import authorize from '../../middlewares/authorize.middleware'
 
 const router: RouterType = Router()
+
+// Address routes (customer only)
+router.get('/address', authenticateToken, authorize('customer'), asyncHandler(UserController.getAddresses))
+router.post('/address', authenticateToken, authorize('customer'), asyncHandler(UserController.addAddress))
+router.put('/address/:_id', authenticateToken, authorize('customer'), asyncHandler(UserController.updateAddress))
+router.patch(
+    '/address/:_id/default',
+    authenticateToken,
+    authorize('customer'),
+    asyncHandler(UserController.updateDefaultAddress)
+)
+router.delete('/address/:_id', authenticateToken, authorize('customer'), asyncHandler(UserController.deleteAddress))
+
+// Admin routes
 router.use(authenticateToken)
 router.use(authorize('admin'))
 

@@ -2,9 +2,10 @@ import UserService from './user.service'
 import { StatusCodes } from '../../constants/httpStatusCode'
 import { handleSuccess } from '../../utils/handleRes'
 import { Request, Response, NextFunction } from 'express'
-import { invalidDataField, missingDataField } from '../../constants/text'
+import { AUTH, invalidDataField, missingDataField } from '../../constants/text'
 import { BadRequestError } from '../../exceptions/error.handler'
 import { isValidEmail, isValidPassword, isValidPhoneNumber, isValidRoleUser } from '../../utils/validate'
+import { Types } from 'mongoose'
 
 class UserController {
     static async createUser(req: Request, res: Response, next: NextFunction) {
@@ -109,6 +110,137 @@ class UserController {
             const data = await UserService.setUserActive(targetId, isActive)
             const message = isActive ? 'Đã bật tài khoản' : 'Đã tắt tài khoản'
             return handleSuccess(res, data, message)
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
+    /**
+     * POST /api/user/address - Thêm địa chỉ mới
+     */
+    static async addAddress(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?._id?.toString()
+            if (!userId) {
+                throw new BadRequestError(AUTH.USER_NOT_FOUND)
+            }
+
+            const { name, phone, addressLine, city, ward, isDefault } = req.body
+
+            if (!name || !phone || !addressLine || !city || !ward) {
+                throw new BadRequestError(missingDataField('name, phone, addressLine, city hoặc ward'))
+            }
+
+            if (!isValidPhoneNumber(phone)) {
+                throw new BadRequestError(invalidDataField('số điện thoại'))
+            }
+
+            // Validate isDefault nếu có
+            if (isDefault !== undefined && typeof isDefault !== 'boolean') {
+                throw new BadRequestError(invalidDataField('isDefault (phải là boolean)'))
+            }
+
+            const data = await UserService.addAddress(userId, req.body)
+            return handleSuccess(res, data, 'Thêm địa chỉ thành công', StatusCodes.CREATED)
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
+    /**
+     * PATCH /api/user/address/:_id/default - Cập nhật địa chỉ mặc định
+     */
+    static async updateDefaultAddress(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?._id?.toString()
+            if (!userId) {
+                throw new BadRequestError(AUTH.USER_NOT_FOUND)
+            }
+
+            const addressId = req.params._id
+
+            if (!Types.ObjectId.isValid(addressId)) {
+                throw new BadRequestError(invalidDataField('id địa chỉ'))
+            }
+
+            const data = await UserService.updateDefaultAddress(userId, addressId)
+            return handleSuccess(res, data, 'Cập nhật địa chỉ mặc định thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
+    /**
+     * PUT /api/user/address/:_id - Cập nhật thông tin địa chỉ
+     */
+    static async updateAddress(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?._id?.toString()
+            if (!userId) {
+                throw new BadRequestError(AUTH.USER_NOT_FOUND)
+            }
+
+            const addressId = req.params._id
+
+            if (!Types.ObjectId.isValid(addressId)) {
+                throw new BadRequestError(invalidDataField('id địa chỉ'))
+            }
+
+            const { phone, isDefault } = req.body
+
+            // Validate phone nếu có
+            if (phone && !isValidPhoneNumber(phone)) {
+                throw new BadRequestError(invalidDataField('số điện thoại'))
+            }
+
+            // Validate isDefault nếu có
+            if (isDefault !== undefined && typeof isDefault !== 'boolean') {
+                throw new BadRequestError(invalidDataField('isDefault (phải là boolean)'))
+            }
+
+            const data = await UserService.updateAddress(userId, addressId, req.body)
+            return handleSuccess(res, data, 'Cập nhật địa chỉ thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
+    /**
+     * GET /api/user/address - Lấy danh sách địa chỉ
+     */
+    static async getAddresses(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?._id?.toString()
+            if (!userId) {
+                throw new BadRequestError(AUTH.USER_NOT_FOUND)
+            }
+
+            const data = await UserService.getAddresses(userId)
+            return handleSuccess(res, data, 'Lấy danh sách địa chỉ thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
+    /**
+     * DELETE /api/user/address/:_id - Xóa địa chỉ
+     */
+    static async deleteAddress(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?._id?.toString()
+            if (!userId) {
+                throw new BadRequestError(AUTH.USER_NOT_FOUND)
+            }
+
+            const addressId = req.params._id
+
+            await UserService.deleteAddress(userId, addressId)
+            return handleSuccess(res, null, 'Xóa địa chỉ thành công')
         } catch (error) {
             next(error)
             return

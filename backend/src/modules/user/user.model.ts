@@ -1,7 +1,57 @@
 import { Schema, model } from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import { IUser } from '../../types/user'
+import { IUser, IAddress } from '../../types/user'
 import { comparePassword, hashPassword } from '../../utils/crypto'
+
+export const addressSchema = new Schema<IAddress>(
+    {
+        name: {
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: 100
+        },
+        phone: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        addressLine: {
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: 500
+        },
+        city: {
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: 100
+        },
+        ward: {
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: 100
+        },
+        isDefault: {
+            type: Boolean,
+            default: false
+        },
+        location: {
+            type: {
+                type: String,
+                enum: ['Point'],
+                default: 'Point'
+            },
+            coordinates: {
+                type: [Number],
+                default: [0, 0]
+            }
+        }
+    },
+    { _id: true }
+)
 
 const userSchema = new Schema<IUser>(
     {
@@ -41,6 +91,10 @@ const userSchema = new Schema<IUser>(
         isActive: {
             type: Boolean,
             default: true
+        },
+        addresses: {
+            type: [addressSchema],
+            default: []
         }
     },
     {

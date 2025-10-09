@@ -5,5 +5,6 @@ import Category from './category/category.model'
 import Product from './product/product.model'
 import DestroyedImage from './destroyedImage/destroyedImage.model'
 import Cart from './cart/cart.model'
+import Order from './order/order.model'
 
-export { User, Auth, OTP, Category, Product, DestroyedImage, Cart }
+export { User, Auth, OTP, Category, Product, DestroyedImage, Cart, Order }

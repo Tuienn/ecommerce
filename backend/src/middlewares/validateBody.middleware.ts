@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 
 const validateBody = (req: Request, res: Response, next: NextFunction) => {
     const method = req.method.toUpperCase()
-    if (!['POST', 'PUT', 'PATCH'].includes(method)) return next()
+    if (!['POST', 'PUT'].includes(method)) return next()
 
     const contentType = req.headers['content-type'] || ''
     if (contentType.includes('multipart/form-data')) {

@@ -6,6 +6,7 @@ import otpRoute from './auth/otp/otp.route'
 import categoryRoute from './category/category.route'
 import productRoute from './product/product.route'
 import cartRoute from './cart/cart.route'
+import orderRoute from './order/order.route'
 
 const router: RouterType = Router()
 
@@ -15,7 +16,8 @@ const defaultRoutes = [
     { path: '/api/user', route: userRoute },
     { path: '/api/category', route: categoryRoute },
     { path: '/api/product', route: productRoute },
-    { path: '/api/cart', route: cartRoute }
+    { path: '/api/cart', route: cartRoute },
+    { path: '/api/order', route: orderRoute }
 ]
 
 defaultRoutes.forEach((route) => {
