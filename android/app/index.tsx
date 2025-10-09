@@ -18,5 +18,5 @@ export default function Screen() {
     }
 
     // If user is authenticated, redirect to main tabs with home as default
-    return <Redirect href='/main/home' />
+    return <Redirect href='/(main)/home' />
 }

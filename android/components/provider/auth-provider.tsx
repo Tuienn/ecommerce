@@ -30,34 +30,52 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setIsLoading(true)
             const accessToken = await getAccessToken()
             if (accessToken) {
-                const res = await AuthSerice.getCurrentUserProfile()
-
-                setUser({
-                    name: res.data.name,
-                    role: res.data.email
-                })
-                return
+                try {
+                    const res = await AuthSerice.getCurrentUserProfile()
+                    if (res && res.data) {
+                        setUser({
+                            name: res.data.name,
+                            role: res.data.role
+                        })
+                        return
+                    }
+                } catch (profileError) {
+                    console.log('Profile fetch failed, trying refresh token...', profileError)
+                    // If profile fetch fails, try refresh token flow
+                }
             }
 
             const refreshToken = await getRefreshToken()
             if (!refreshToken) {
+                await clearAuthToken()
+                setUser(null)
                 return
             }
 
-            const res = await AuthSerice.refreshToken(refreshToken)
-            if (res.code === 200) {
-                await saveAccessToken(res.data.accessToken)
-                setUser({
-                    name: res.data.name,
-                    role: res.data.email
-                })
-            } else {
+            try {
+                const res = await AuthSerice.refreshToken(refreshToken)
+                if (res && res.code === 200 && res.data) {
+                    await saveAccessToken(res.data.accessToken)
+                    if (res.data.refreshToken) {
+                        await saveRefreshToken(res.data.refreshToken)
+                    }
+                    setUser({
+                        name: res.data.name,
+                        role: res.data.role
+                    })
+                } else {
+                    await clearAuthToken()
+                    setUser(null)
+                }
+            } catch (refreshError) {
+                console.log('Refresh token failed:', refreshError)
                 await clearAuthToken()
                 setUser(null)
             }
         } catch (error) {
             console.error('Error checking auth status:', error)
-            throw error
+            await clearAuthToken()
+            setUser(null)
         } finally {
             setIsLoading(false)
         }

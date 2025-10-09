@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
 import { View, FlatList, RefreshControl } from 'react-native'
+import { useRouter } from 'expo-router'
 import { Text } from '@/components/ui/text'
-import SearchInput from '../../../components/app/main/home/search-input'
-import CategoryFilter from '../../../components/app/main/home/category-filter'
-import ProductItem from '../../../components/app/main/home/product-item'
+import SearchInput from '@/components/app/main/home/search-input'
+import CategoryFilter from '@/components/app/main/home/category-filter'
+import ProductItem from '@/components/app/main/home/product-item'
 import ProductSkeleton from '@/components/app/main/home/product-skeleton'
 import ProductService from '@/services/product.service'
 import { IProduct, ProductSearchParams, FilterState } from '@/types/product'
 
 const HomeScreen = () => {
+    const router = useRouter()
     const [products, setProducts] = useState<IProduct[]>([])
     const [loading, setLoading] = useState(false)
     const [refreshing, setRefreshing] = useState(false)
@@ -139,7 +141,7 @@ const HomeScreen = () => {
 
     const handleProductPress = (product: IProduct) => {
         // Navigate to product detail screen
-        console.log('Product pressed:', product.name)
+        router.push(`/product/${product._id}`)
     }
 
     const renderProduct = ({ item }: { item: IProduct; index: number }) => (
