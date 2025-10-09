@@ -1,4 +1,3 @@
-import 'express'
 import { Types } from 'mongoose'
 
 declare global {

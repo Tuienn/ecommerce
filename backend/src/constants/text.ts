@@ -7,6 +7,15 @@ export const AUTH = {
     INVALID_ACCOUNT: 'Tài khoản hoặc mật khẩu không đúng'
 }
 
+export const CART = {
+    NOT_FOUND: 'Không tìm thấy giỏ hàng',
+    EMPTY: 'Giỏ hàng trống',
+    ITEM_NOT_FOUND: 'Không tìm thấy sản phẩm trong giỏ hàng',
+    PRODUCT_NOT_FOUND: 'Không tìm thấy sản phẩm',
+    PRODUCT_INACTIVE: 'Sản phẩm đã ngừng kinh doanh',
+    INSUFFICIENT_STOCK: 'Số lượng sản phẩm không đủ'
+}
+
 export const missingDataField = (field: string) => `Thiếu trường dữ liệu: ${field}`
 export const invalidDataField = (field: string) => `Trường dữ liệu không hợp lệ: ${field}`
 export const existedDataField = (field: string) => `Trường dữ liệu đã tồn tại: ${field}`

@@ -17,7 +17,7 @@ export const errorMiddleware = (error: CustomError, req: Request, res: Response,
         message: error.message,
         name: error.name,
         stack: error.stack,
-        code: error.code,
+        code: error.code || error.statusCode,
         url: req.originalUrl,
         method: req.method,
         timestamp: new Date().toISOString()

@@ -1,0 +1,21 @@
+# Bỏ qua toàn bộ thư mục build/dist
+dist/
+build/
+
+# Bỏ qua node_modules
+node_modules/
+
+# Bỏ qua file lock
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Bỏ qua các file config nhất định
+*.config.js
+*.config.cjs
+
+# Bỏ qua tất cả file .md trong thư mục docs
+docs/**/*.md
+
+.vscode/
+.cursor/

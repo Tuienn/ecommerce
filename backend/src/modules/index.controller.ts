@@ -3,5 +3,6 @@ import AuthController from './auth/auth.controller'
 import OTPController from './auth/otp/otp.controller'
 import CategoryController from './category/category.controller'
 import ProductController from './product/product.controller'
+import CartController from './cart/cart.controller'
 
-export { UserController, AuthController, OTPController, CategoryController, ProductController }
+export { UserController, AuthController, OTPController, CategoryController, ProductController, CartController }
