@@ -1,11 +1,11 @@
 {
     "expo": {
-        "name": "android",
-        "slug": "android",
+        "name": "ecommerce",
+        "slug": "ecommerce",
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
-        "scheme": "android",
+        "scheme": "ecommerce",
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
         "splash": {

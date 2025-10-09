@@ -3,7 +3,7 @@ import { View } from 'react-native'
 
 const HomeScreen = () => {
     return (
-        <View>
+        <View className='px-4'>
             <Text>Trang chủ</Text>
         </View>
     )

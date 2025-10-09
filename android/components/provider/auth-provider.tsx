@@ -8,6 +8,7 @@ export interface AuthContextType {
     login: (accessToken: string, refreshToken: string, user: IUser) => Promise<void>
     logout: () => Promise<any>
     user: IUser | null
+    isLoading: boolean
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -18,6 +19,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<IUser | null>(null)
+    const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
         checkAuthStatus()
@@ -25,9 +27,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const checkAuthStatus = async () => {
         try {
+            setIsLoading(true)
             const accessToken = await getAccessToken()
             if (accessToken) {
                 const res = await AuthSerice.getCurrentUserProfile()
+
                 setUser({
                     name: res.data.name,
                     role: res.data.email
@@ -54,6 +58,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } catch (error) {
             console.error('Error checking auth status:', error)
             throw error
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -93,7 +99,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isAuth: !!user,
         login,
         logout,
-        user
+        user,
+        isLoading
     }
 
     return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
