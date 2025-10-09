@@ -1,26 +1,58 @@
+import { useState, useEffect } from 'react'
 import { View, ScrollView, TouchableOpacity } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { ArrowLeft } from 'lucide-react-native'
 import { Text } from '@/components/ui/text'
 import { Button } from '@/components/ui/button'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import ImgCarousel from '@/components/app/product/img-carousel'
+import ProductInfo from '@/components/app/product/product-item'
+import ProductDetailSkeleton from '@/components/app/product/product-skeleton'
+import ProductService from '@/services/product.service'
+import { IProduct } from '@/types/product'
+import { showNotification } from '@/lib/utils'
 
 export default function ProductDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>()
     const router = useRouter()
+    const [product, setProduct] = useState<IProduct | null>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        if (id) {
+            fetchProductDetail()
+        }
+    }, [id])
+
+    const fetchProductDetail = async () => {
+        try {
+            setLoading(true)
+            const response = await ProductService.getProductById(id as string)
+            setProduct(response.data)
+        } catch (error) {
+            console.error('Error fetching product:', error)
+            showNotification('error', 'Không thể tải thông tin sản phẩm')
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const handleBack = () => {
         router.back()
     }
 
     const handleAddToCart = () => {
+        if (!product) return
         // TODO: Implement add to cart logic
-        console.log('Add to cart:', id)
+        console.log('Add to cart:', product._id)
+        showNotification('success', `Đã thêm ${product.name} vào giỏ hàng`)
     }
 
     const handleBuyNow = () => {
+        if (!product) return
         // TODO: Implement buy now logic
-        console.log('Buy now:', id)
+        console.log('Buy now:', product._id)
+        showNotification('info', 'Tính năng mua ngay đang được phát triển')
     }
 
     return (
@@ -30,39 +62,44 @@ export default function ProductDetailScreen() {
                 <TouchableOpacity onPress={handleBack} className='mr-3'>
                     <ArrowLeft color='#000' size={24} />
                 </TouchableOpacity>
-                <Text className='text-lg font-semibold'>Product Detail</Text>
+                <Text className='text-lg font-semibold'>Chi tiết sản phẩm</Text>
             </View>
 
             {/* Content */}
-            <View className='flex-1'>
+            {loading ? (
                 <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
-                    {/* Product Image Placeholder */}
-                    <View className='mx-4 mt-4 h-80 items-center justify-center rounded-lg bg-gray-100'>
-                        <Text className='text-center text-gray-500'>
-                            Demo Product Image{'\n'}ID: {id}
-                        </Text>
-                    </View>
-
-                    {/* Product Info Demo */}
-                    <View className='mx-4 mt-4'>
-                        <Text className='text-2xl font-bold'>Product Name</Text>
-                        <Text className='mt-2 text-xl font-semibold text-green-600'>$99.99</Text>
-                        <Text className='mt-4 text-gray-600'>
-                            This is a demo product description. Add your product details here.
-                        </Text>
-                    </View>
+                    <ProductDetailSkeleton />
                 </ScrollView>
+            ) : product ? (
+                <View className='flex-1'>
+                    <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
+                        {/* Product Images Carousel */}
+                        <ImgCarousel images={product.images} />
 
-                {/* Bottom Action Buttons */}
-                <View className='flex-row gap-3 border-t border-gray-200 bg-white px-4 py-3'>
-                    <Button onPress={handleAddToCart} variant='outline' className='flex-1 border-green-600'>
-                        <Text className='font-semibold text-green-600'>Add to Cart</Text>
-                    </Button>
-                    <Button onPress={handleBuyNow} className='flex-1 bg-green-600'>
-                        <Text className='font-semibold text-white'>Buy Now</Text>
-                    </Button>
+                        {/* Product Info */}
+                        <ProductInfo product={product} />
+                    </ScrollView>
+
+                    {/* Bottom Action Buttons */}
+                    <View className='flex-row gap-3 border-t border-gray-200 bg-white px-4 py-3'>
+                        <Button
+                            onPress={handleAddToCart}
+                            variant='outline'
+                            className='flex-1 border-green-600'
+                            disabled={product.stock === 0}
+                        >
+                            <Text className='font-semibold text-green-600'>Thêm vào giỏ</Text>
+                        </Button>
+                        <Button onPress={handleBuyNow} className='flex-1 bg-green-600' disabled={product.stock === 0}>
+                            <Text className='font-semibold text-white'>Mua ngay</Text>
+                        </Button>
+                    </View>
                 </View>
-            </View>
+            ) : (
+                <View className='flex-1 items-center justify-center'>
+                    <Text className='text-gray-500'>Không tìm thấy sản phẩm</Text>
+                </View>
+            )}
         </SafeAreaView>
     )
 }

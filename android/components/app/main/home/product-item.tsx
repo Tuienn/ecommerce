@@ -2,6 +2,7 @@ import { View, Image, Pressable } from 'react-native'
 import { Text } from '@/components/ui/text'
 import { Star } from 'lucide-react-native'
 import { IProduct } from '@/types/product'
+import { formatPrice, formatSoldCount } from '@/lib/format'
 
 interface ProductItemProps {
     product: IProduct
@@ -9,20 +10,6 @@ interface ProductItemProps {
 }
 
 const ProductItem = ({ product, onPress }: ProductItemProps) => {
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(price)
-    }
-
-    const formatSoldCount = (count: number) => {
-        if (count >= 1000) {
-            return `${(count / 1000).toFixed(1)}k`
-        }
-        return count.toString()
-    }
-
     const handlePress = () => {
         onPress?.(product)
     }
