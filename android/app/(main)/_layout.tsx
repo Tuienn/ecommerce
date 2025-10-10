@@ -63,12 +63,6 @@ export default function TabLayout() {
                         tabBarIcon: ({ color, size }) => <HelpCircle color={color} size={size} />
                     }}
                 />
-                <Tabs.Screen
-                    name='product'
-                    options={{
-                        href: null // Hide from tab bar
-                    }}
-                />
             </Tabs>
         </SafeAreaView>
     )

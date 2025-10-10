@@ -7,9 +7,10 @@ class CartService {
     /**
      * Lấy giỏ hàng hiện tại của user
      */
-    static async getCart(userId: string, query?: { page?: number; limit?: number }) {
+    static async getCarts(userId: string, query?: { page?: number; limit?: number; productName?: string }) {
         const page = query?.page || 1
         const limit = query?.limit || 10
+        const productName = query?.productName
 
         let cart = await Cart.findOne({ userId })
 
@@ -18,27 +19,33 @@ class CartService {
             cart = await Cart.create({ userId, items: [] })
         }
 
-        // Tính tổng số items
-        const total = cart.items.length
+        // Populate toàn bộ items trước để có thể filter
+        const populatedCart = await Cart.populate(cart, {
+            path: 'items.productId',
+            select: 'name price basePrice discountPercent unit stock images isActive'
+        })
 
-        // Phân trang items
+        // Filter theo productName nếu có
+        let filteredItems = populatedCart.items
+        if (productName && productName.trim()) {
+            const searchTerm = productName.trim().toLowerCase()
+            filteredItems = populatedCart.items.filter((item: any) => {
+                return item.productId?.name?.toLowerCase().includes(searchTerm)
+            })
+        }
+
+        // Tính tổng số items sau khi filter
+        const total = filteredItems.length
+
+        // Phân trang items sau khi filter
         const startIndex = (page - 1) * limit
         const endIndex = startIndex + limit
-        const paginatedItems = cart.items.slice(startIndex, endIndex)
-
-        // Populate thông tin sản phẩm cho items đã phân trang
-        const populatedCart = await Cart.populate(
-            { ...cart.toObject(), items: paginatedItems },
-            {
-                path: 'items.productId',
-                select: 'name price basePrice discountPercent unit stock images isActive'
-            }
-        )
+        const paginatedItems = filteredItems.slice(startIndex, endIndex)
 
         return {
             _id: cart._id,
             userId: cart.userId,
-            items: populatedCart.items,
+            items: paginatedItems,
             createdAt: cart.createdAt,
             updatedAt: cart.updatedAt,
             pagination: {

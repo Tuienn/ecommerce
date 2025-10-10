@@ -11,7 +11,7 @@ router.use(authenticateToken)
 router.use(authorize('customer'))
 
 // GET /api/cart - Lấy giỏ hàng hiện tại
-router.get('', asyncHandler(CartController.getCart))
+router.get('', asyncHandler(CartController.getCarts))
 
 // POST /api/cart/add - Thêm sản phẩm vào giỏ
 router.post('/add', asyncHandler(CartController.addToCart))

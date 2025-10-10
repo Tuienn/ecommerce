@@ -51,7 +51,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                 )}
                 {product.stock > 0 ? (
                     <Badge className='bg-green-600'>
-                        <Text className='text-xs font-semibold text-white'>Còn hàng</Text>
+                        <Text className='text-xs font-semibold text-white'>Còn hàng ({product.stock})</Text>
                     </Badge>
                 ) : (
                     <Badge className='bg-gray-400'>

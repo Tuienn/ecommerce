@@ -10,7 +10,7 @@ class CartController {
     /**
      * GET /api/cart - Lấy giỏ hàng hiện tại
      */
-    static async getCart(req: Request, res: Response, next: NextFunction) {
+    static async getCarts(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user?._id?.toString()
             if (!userId) {
@@ -19,8 +19,9 @@ class CartController {
 
             const page = req.query.page ? parseInt(req.query.page as string) : 1
             const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
+            const productName = req.query.productName as string | undefined
 
-            const data = await CartService.getCart(userId, { page, limit })
+            const data = await CartService.getCarts(userId, { page, limit, productName })
             return handleSuccess(res, data, 'Lấy giỏ hàng thành công')
         } catch (error) {
             next(error)

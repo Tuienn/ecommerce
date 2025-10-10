@@ -1,4 +1,4 @@
-import { Order, Product } from '../index.model'
+import { Order, Product, User } from '../index.model'
 import { BadRequestError, NotFoundError } from '../../exceptions/error.handler'
 import { IOrderItem, OrderStatus, PaymentStatus } from '../../types/order'
 import { Types } from 'mongoose'
@@ -11,6 +11,20 @@ class OrderService {
         payment: { provider: string; amount: number }
     }) {
         const { userId, items, shippingAddress, payment } = data
+
+        // Fetch user để lấy thông tin địa chỉ
+        const user = await User.findById(userId)
+        if (!user) {
+            throw new NotFoundError('Không tìm thấy người dùng')
+        }
+
+        // Tìm địa chỉ từ danh sách addresses của user
+        const addressId = typeof shippingAddress === 'string' ? shippingAddress : shippingAddress._id
+        const userAddress = user.addresses.find((addr) => addr._id?.toString() === addressId)
+
+        if (!userAddress) {
+            throw new BadRequestError('Địa chỉ giao hàng không hợp lệ')
+        }
 
         // Validate và tính toán items
         const orderItems: IOrderItem[] = []
@@ -49,7 +63,7 @@ class OrderService {
         const discountPercent = 0 // Default no discount
         const total = baseTotal + shippingFee
 
-        // Tạo order
+        // Tạo order với full address object
         const newOrder = await Order.create({
             userId: new Types.ObjectId(userId),
             items: orderItems,
@@ -58,7 +72,15 @@ class OrderService {
             discountPercent,
             baseTotal,
             currency: 'VND',
-            shippingAddress,
+            shippingAddress: {
+                name: userAddress.name,
+                phone: userAddress.phone,
+                addressLine: userAddress.addressLine,
+                city: userAddress.city,
+                ward: userAddress.ward,
+                isDefault: userAddress.isDefault,
+                location: userAddress.location
+            },
             status: 'PROCESSING',
             payment: {
                 provider: payment.provider,
