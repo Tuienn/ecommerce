@@ -77,6 +77,26 @@ class OrderController {
         }
     }
 
+    static async getSimpleOrders(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?._id
+
+            if (!userId) {
+                throw new BadRequestError(AUTH.USER_NOT_FOUND)
+            }
+
+            const page = req.query.page ? parseInt(req.query.page as string) : 1
+            const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
+            const status = req.query.status as string
+
+            const data = await OrderService.getOrders({ userId: userId.toString(), page, limit, status })
+            return handleSuccess(res, data, 'Lấy danh sách đơn hàng thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
     static async getOrderById(req: Request, res: Response, next: NextFunction) {
         try {
             const orderId = req.params.id

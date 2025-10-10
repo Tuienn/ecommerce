@@ -19,9 +19,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import ImgCarousel from '@/components/app/product/img-carousel'
 import ProductInfo from '@/components/app/product/product-item'
 import ProductDetailSkeleton from '@/components/app/product/product-skeleton'
+import PaymentDialog from '@/components/app/common/payment-dialog'
 import ProductService from '@/services/product.service'
 import CartService from '@/services/cart.service'
 import { IProduct } from '@/types/product'
+import { CheckoutData } from '@/types/cart'
 import { showNotification } from '@/lib/utils'
 
 export default function ProductDetailScreen() {
@@ -32,6 +34,8 @@ export default function ProductDetailScreen() {
     const [dialogOpen, setDialogOpen] = useState(false)
     const [quantity, setQuantity] = useState('1')
     const [addingToCart, setAddingToCart] = useState(false)
+    const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
+    const [buyNowData, setBuyNowData] = useState<CheckoutData | null>(null)
 
     useEffect(() => {
         if (id) {
@@ -93,9 +97,32 @@ export default function ProductDetailScreen() {
 
     const handleBuyNow = () => {
         if (!product) return
-        // TODO: Implement buy now logic
-        console.log('Buy now:', product._id)
-        showNotification('info', 'Tính năng mua ngay đang được phát triển')
+
+        // Create checkout data for single product
+        const checkoutData: CheckoutData = {
+            items: [
+                {
+                    productId: product._id,
+                    name: product.name,
+                    price: product.price,
+                    basePrice: product.basePrice,
+                    unit: product.unit,
+                    quantity: 1,
+                    total: product.price,
+                    baseTotal: product.basePrice
+                }
+            ],
+            totalAmount: product.price,
+            baseTotalAmount: product.basePrice
+        }
+
+        setBuyNowData(checkoutData)
+        setPaymentDialogOpen(true)
+    }
+
+    const handleBuyNowSuccess = () => {
+        showNotification('success', 'Đơn hàng đã được tạo thành công')
+        router.push('/(main)/order')
     }
 
     return (
@@ -182,6 +209,14 @@ export default function ProductDetailScreen() {
                     <Text className='text-gray-500'>Không tìm thấy sản phẩm</Text>
                 </View>
             )}
+
+            {/* Payment Dialog */}
+            <PaymentDialog
+                open={paymentDialogOpen}
+                onOpenChange={setPaymentDialogOpen}
+                checkoutData={buyNowData}
+                onSuccess={handleBuyNowSuccess}
+            />
         </SafeAreaView>
     )
 }

@@ -1,4 +1,4 @@
-import { Order, Product, User } from '../index.model'
+import { Order, Product, User, Cart } from '../index.model'
 import { BadRequestError, NotFoundError } from '../../exceptions/error.handler'
 import { IOrderItem, OrderStatus, PaymentStatus } from '../../types/order'
 import { Types } from 'mongoose'
@@ -94,6 +94,20 @@ class OrderService {
             await Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } })
         }
 
+        // Xóa các cart items đã được đặt hàng
+        const productIds = items.map((item) => new Types.ObjectId(item.productId))
+        console.log('🚀 ~ OrderService ~ createOrder ~ Deleting cart items:', {
+            userId,
+            productIds: productIds.map((id) => id.toString()),
+            itemsCount: items.length
+        })
+
+        // Xóa các items từ cart (Cart có structure: { userId, items: [{ productId, quantity }] })
+        await Cart.updateOne(
+            { userId: new Types.ObjectId(userId) },
+            { $pull: { items: { productId: { $in: productIds } } } }
+        )
+
         return newOrder.toObject()
     }
 
@@ -106,7 +120,33 @@ class OrderService {
         }
 
         const orders = await Order.find(filter)
-            .populate('items.productId', 'name images')
+            .populate('items.productId')
+            .limit(limit)
+            .skip((page - 1) * limit)
+            .sort({ createdAt: -1 })
+
+        const total = await Order.countDocuments(filter)
+
+        return {
+            data: orders,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
+        }
+    }
+
+    static async getSimpleOrders(query: { userId: string; page?: number; limit?: number; status?: string }) {
+        const { userId, page = 1, limit = 10, status } = query
+        const filter: any = { userId: new Types.ObjectId(userId) }
+
+        if (status) {
+            filter.status = status
+        }
+
+        const orders = await Order.find(filter)
             .limit(limit)
             .skip((page - 1) * limit)
             .sort({ createdAt: -1 })

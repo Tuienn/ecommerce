@@ -107,7 +107,7 @@ class CartService {
 
         await cart.save()
 
-        return true
+        return cart.toObject()
     }
 
     /**
