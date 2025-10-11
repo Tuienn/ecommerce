@@ -70,7 +70,7 @@ class AuthController {
         }
     }
 
-    static async registerUserByEmail(req: Request, res: Response, next: NextFunction) {
+    static async registerUser(req: Request, res: Response, next: NextFunction) {
         try {
             const authHeader = req.headers['authorization']
             const accessToken = authHeader && authHeader.split(' ')[1]
@@ -89,7 +89,7 @@ class AuthController {
             if (!isValidPassword(password)) throw new BadRequestError(invalidDataField('mật khẩu'))
             if (!isValidPhoneNumber(phone)) throw new BadRequestError(invalidDataField('số điện thoại'))
 
-            const userData = await AuthService.registerUserByEmail(accessToken, req.body)
+            const userData = await AuthService.registerUser(accessToken, req.body)
             return handleSuccess(res, userData, 'Đăng ký người dùng thành công')
         } catch (error) {
             next(error)

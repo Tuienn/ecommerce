@@ -124,10 +124,12 @@ class AuthService {
         }
     }
 
-    static async registerUserByEmail(accessToken: string, userData: any) {
-        // Kiểm tra accessToken OTP hợp lệ
-        const isValidOTP = await OTPService.checkValidEmailOTPAfterRegister(accessToken)
-        if (!isValidOTP) {
+    static async registerUser(accessToken: string, userData: any) {
+        // Kiểm tra accessToken OTP hợp lệ (hỗ trợ cả email và phone)
+        const isValidEmailOTP = await OTPService.checkValidEmailOTPAfterRegister(accessToken)
+        const isValidPhoneOTP = await OTPService.checkValidPhoneOTPAfterRegister(accessToken)
+
+        if (!isValidEmailOTP && !isValidPhoneOTP) {
             throw new OtpError(AUTH.OTP_EXPIRED)
         }
 

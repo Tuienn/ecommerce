@@ -8,7 +8,7 @@ const router: RouterType = Router()
 router.post('/login/email', asyncHandler(AuthController.loginByEmail))
 router.post('/refresh-token', asyncHandler(AuthController.refreshToken))
 router.post('/logout', asyncHandler(AuthController.logout))
-router.post('/register/email', asyncHandler(AuthController.registerUserByEmail))
+router.post('/register', asyncHandler(AuthController.registerUser))
 router.get('', authenticateToken, asyncHandler(AuthController.getCurrentUser))
 
 export default router

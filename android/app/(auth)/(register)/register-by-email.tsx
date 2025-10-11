@@ -14,7 +14,7 @@ import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
 
 type RegistrationStep = 'email' | 'otp' | 'password'
 
-const RegisterByEmailScreen: React.FC = () => {
+const registerAccountScreen: React.FC = () => {
     const router = useRouter()
     const { login } = useAuth()
 
@@ -55,7 +55,7 @@ const RegisterByEmailScreen: React.FC = () => {
 
         try {
             setLoading(true)
-            const res = await AuthService.registerByEmailOTP(email)
+            const res = await AuthService.registerAccountOTP(email)
 
             if (res.code === 200) {
                 showNotification('success', 'Mã OTP đã được gửi đến email của bạn')
@@ -146,7 +146,7 @@ const RegisterByEmailScreen: React.FC = () => {
 
         try {
             setLoading(true)
-            const registerRes = await AuthService.registerByEmail(name, email, password, phone, accessTokenVerify)
+            const registerRes = await AuthService.registerAccount(name, email, password, phone, accessTokenVerify)
 
             if (registerRes.code === 200 || registerRes.code === 201) {
                 showNotification('success', 'Đăng ký thành công')
@@ -238,6 +238,21 @@ const RegisterByEmailScreen: React.FC = () => {
                                 <Button onPress={handleSendOTP} disabled={loading}>
                                     <Text>{loading ? 'Đang gửi...' : 'Gửi mã OTP'}</Text>
                                     <Icon as={MailIcon} />
+                                </Button>
+
+                                <View className='relative items-center'>
+                                    <View className='absolute left-0 right-0 top-1/2 h-px bg-border' />
+                                    <Text className='relative bg-background px-4 text-sm text-muted-foreground'>
+                                        Hoặc
+                                    </Text>
+                                </View>
+
+                                <Button
+                                    variant='outline'
+                                    onPress={() => router.push('/(auth)/(register)/register-by-phone')}
+                                    disabled={loading}
+                                >
+                                    <Text>Đăng ký bằng số điện thoại</Text>
                                 </Button>
                             </View>
                         )}
@@ -418,4 +433,4 @@ const RegisterByEmailScreen: React.FC = () => {
     )
 }
 
-export default RegisterByEmailScreen
+export default registerAccountScreen
