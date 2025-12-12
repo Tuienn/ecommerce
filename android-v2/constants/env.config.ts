@@ -1,0 +1,1 @@
+export const EXPRESS_BASE_URL = process.env.EXPO_PUBLIC_EXPRESS_BASE_URL
