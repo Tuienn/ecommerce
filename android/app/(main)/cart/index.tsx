@@ -12,8 +12,12 @@ import { CheckoutData, ICartItem } from '@/types/cart'
 import { showNotification } from '@/lib/utils'
 import { formatPrice } from '@/lib/format'
 import { useRouter } from 'expo-router'
+import { useAuth } from '@/hooks/use-auth'
+import { ShoppingCart, LogIn } from 'lucide-react-native'
 
 const CartScreen = () => {
+    const { isAuth } = useAuth()
+    const router = useRouter()
     const [cartItems, setCartItems] = useState<ICartItem[]>([])
     const [loading, setLoading] = useState(false)
     const [refreshing, setRefreshing] = useState(false)
@@ -26,11 +30,12 @@ const CartScreen = () => {
     const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
     const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null)
     const [checkingOut, setCheckingOut] = useState(false)
-    const router = useRouter()
 
     useEffect(() => {
-        fetchCart(true, '')
-    }, [])
+        if (isAuth) {
+            fetchCart(true, '')
+        }
+    }, [isAuth])
 
     const fetchCart = async (isInitial: boolean = false, search: string = searchTerm) => {
         if (isInitial) {
@@ -226,6 +231,33 @@ const CartScreen = () => {
         )
     }
 
+    // Guest mode UI
+    if (!isAuth) {
+        return (
+            <View className='flex-1 bg-gray-50'>
+                {/* Header */}
+                <View className='border-b border-gray-200 bg-white px-4 py-4'>
+                    <Text className='text-xl font-bold text-gray-900'>Giỏ hàng</Text>
+                </View>
+                <View className='flex-1 items-center justify-center px-4'>
+                    <View className='mb-6 h-32 w-32 items-center justify-center rounded-full bg-green-100'>
+                        <ShoppingCart size={64} color='#16a34a' />
+                    </View>
+                    <Text className='mb-2 text-center text-2xl font-bold text-gray-900'>Đăng nhập để xem giỏ hàng</Text>
+                    <Text className='mb-8 text-center text-base text-gray-600'>
+                        Vui lòng đăng nhập để quản lý giỏ hàng và thực hiện mua sắm
+                    </Text>
+                    <Button onPress={() => router.push('/(auth)/(login)/login-by-email')}>
+                        <LogIn size={20} color='white' />
+                        <Text>Đăng nhập ngay</Text>
+                    </Button>
+                </View>
+                Ư
+            </View>
+        )
+    }
+
+    // Authenticated user UI
     return (
         <View className='flex-1 bg-gray-50'>
             {/* Search Header */}

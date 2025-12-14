@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { View, FlatList, RefreshControl, ActivityIndicator, ScrollView } from 'react-native'
 import { Text } from '@/components/ui/text'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import OrderItem from '@/components/app/order/order-item'
 import OrderSkeleton from '@/components/app/order/order-skeleton'
@@ -8,6 +9,9 @@ import OrderDetailDialog from '@/components/app/order/order-detail-dialog'
 import OrderService from '@/services/order.service'
 import { IOrder, OrderStatus } from '@/types/order'
 import { showNotification } from '@/lib/utils'
+import { useAuth } from '@/hooks/use-auth'
+import { useRouter } from 'expo-router'
+import { Package, LogIn } from 'lucide-react-native'
 
 const ORDER_STATUSES: { value: OrderStatus; label: string }[] = [
     { value: 'PROCESSING', label: 'Xử lý' },
@@ -19,6 +23,8 @@ const ORDER_STATUSES: { value: OrderStatus; label: string }[] = [
 ]
 
 export default function OrderScreen() {
+    const { isAuth } = useAuth()
+    const router = useRouter()
     const [activeTab, setActiveTab] = useState<OrderStatus>('PROCESSING')
     const [orders, setOrders] = useState<Record<string, IOrder[]>>({})
     const [loading, setLoading] = useState<Record<string, boolean>>({})
@@ -30,8 +36,10 @@ export default function OrderScreen() {
     const [detailDialogOpen, setDetailDialogOpen] = useState(false)
 
     useEffect(() => {
-        fetchOrders(activeTab, true)
-    }, [activeTab])
+        if (isAuth) {
+            fetchOrders(activeTab, true)
+        }
+    }, [activeTab, isAuth])
 
     const fetchOrders = async (status: string, isInitial: boolean = false) => {
         // Skip if already loading or no more data
@@ -155,6 +163,33 @@ export default function OrderScreen() {
         )
     }
 
+    // Guest mode UI
+    if (!isAuth) {
+        return (
+            <View className='flex-1 bg-gray-50'>
+                {/* Header */}
+                <View className='border-b border-gray-200 bg-white px-4 py-4'>
+                    <Text className='text-xl font-bold text-gray-900'>Đơn hàng</Text>
+                </View>
+
+                <View className='flex-1 items-center justify-center px-4'>
+                    <View className='mb-6 h-32 w-32 items-center justify-center rounded-full bg-green-100'>
+                        <Package size={64} color='#16a34a' />
+                    </View>
+                    <Text className='mb-2 text-center text-2xl font-bold text-gray-900'>Đăng nhập để xem đơn hàng</Text>
+                    <Text className='mb-8 text-center text-base text-gray-600'>
+                        Vui lòng đăng nhập để theo dõi và quản lý đơn hàng của bạn
+                    </Text>
+                    <Button onPress={() => router.push('/(auth)/(login)/login-by-email')}>
+                        <LogIn size={20} color='white' />
+                        <Text>Đăng nhập ngay</Text>
+                    </Button>
+                </View>
+            </View>
+        )
+    }
+
+    // Authenticated user UI
     return (
         <View className='flex-1 bg-gray-50'>
             {/* Tabs */}

@@ -5,7 +5,7 @@ const { sign, verify } = pkg
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'default_access_token_secret'
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default_refresh_token_secret'
 
-const ACCESS_TOKEN_EXPIRES_IN = '1d'
+const ACCESS_TOKEN_EXPIRES_IN = '60m'
 const REFRESH_TOKEN_EXPIRES_IN = '30d'
 
 const generateAccessToken = (payload: any) => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, ScrollView, RefreshControl, TouchableOpacity } from 'react-native'
+import { View, ScrollView, RefreshControl } from 'react-native'
 import { Text } from '@/components/ui/text'
 import { Button } from '@/components/ui/button'
 import UserInfo from '@/components/app/setting/user-info'
@@ -10,9 +10,10 @@ import UserService from '@/services/user.service'
 import { IAddress } from '@/types/user'
 import { showNotification } from '@/lib/utils'
 import { clearAuthToken, getRefreshToken } from '@/lib/secure-store'
-import { Plus, LogOut } from 'lucide-react-native'
+import { Plus, LogOut, LogIn, UserPlus } from 'lucide-react-native'
 import { useRouter } from 'expo-router'
 import AuthSerice from '@/services/auth.service'
+import { useAuth } from '@/hooks/use-auth'
 
 interface UserProfile {
     _id: string
@@ -25,6 +26,7 @@ interface UserProfile {
 
 export default function SettingScreen() {
     const router = useRouter()
+    const { isAuth } = useAuth()
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [addresses, setAddresses] = useState<IAddress[]>([])
     const [loading, setLoading] = useState(true)
@@ -34,8 +36,12 @@ export default function SettingScreen() {
     const [saving, setSaving] = useState(false)
 
     useEffect(() => {
-        fetchData()
-    }, [])
+        if (isAuth) {
+            fetchData()
+        } else {
+            setLoading(false)
+        }
+    }, [isAuth])
 
     const fetchData = async () => {
         try {
@@ -134,6 +140,70 @@ export default function SettingScreen() {
         }
     }
 
+    // Guest mode UI
+    if (!isAuth) {
+        return (
+            <View className='flex-1 bg-gray-50'>
+                {/* Header */}
+                <View className='border-b border-gray-200 bg-white px-4 py-4'>
+                    <Text className='text-xl font-bold text-gray-900'>Cài đặt</Text>
+                </View>
+
+                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
+                    <View className='flex-1 items-center justify-center px-4 pt-20'>
+                        {/* Welcome Section */}
+                        <View className='mb-8 items-center'>
+                            <View className='mb-4 h-24 w-24 items-center justify-center rounded-full bg-green-100'>
+                                <LogIn size={48} color='#16a34a' />
+                            </View>
+                            <Text className='mb-2 text-center text-2xl font-bold text-gray-900'>
+                                Chào mừng đến với ứng dụng
+                            </Text>
+                            <Text className='text-center text-base text-gray-600'>
+                                Đăng nhập để quản lý đơn hàng, giỏ hàng và địa chỉ giao hàng
+                            </Text>
+                        </View>
+
+                        {/* Action Buttons */}
+                        <View className='w-full max-w-sm gap-3'>
+                            <Button onPress={() => router.push('/(auth)/(login)/login-by-email')}>
+                                <LogIn size={20} color='white' />
+                                <Text>Đăng nhập</Text>
+                            </Button>
+
+                            <Button
+                                onPress={() => router.push('/(auth)/(register)/register-by-email')}
+                                variant='outline'
+                            >
+                                <UserPlus size={20} color='#16a34a' />
+                                <Text>Đăng ký</Text>
+                            </Button>
+                        </View>
+
+                        {/* Info Cards */}
+                        <View className='mt-12 w-full max-w-sm gap-3'>
+                            <View className='rounded-lg bg-white p-4 shadow-sm'>
+                                <Text className='mb-1 font-semibold text-gray-900'>🛒 Giỏ hàng</Text>
+                                <Text className='text-sm text-gray-600'>
+                                    Lưu trữ và quản lý sản phẩm yêu thích của bạn
+                                </Text>
+                            </View>
+                            <View className='rounded-lg bg-white p-4 shadow-sm'>
+                                <Text className='mb-1 font-semibold text-gray-900'>📦 Đơn hàng</Text>
+                                <Text className='text-sm text-gray-600'>Theo dõi trạng thái đơn hàng của bạn</Text>
+                            </View>
+                            <View className='rounded-lg bg-white p-4 shadow-sm'>
+                                <Text className='mb-1 font-semibold text-gray-900'>📍 Địa chỉ</Text>
+                                <Text className='text-sm text-gray-600'>Quản lý địa chỉ giao hàng dễ dàng</Text>
+                            </View>
+                        </View>
+                    </View>
+                </ScrollView>
+            </View>
+        )
+    }
+
+    // Authenticated user UI
     return (
         <View className='flex-1 bg-gray-50'>
             {/* Header */}

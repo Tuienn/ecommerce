@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router'
-import { ShoppingCart, Package, Home, HelpCircle, User } from 'lucide-react-native'
+import { ShoppingCart, Package, Home, User } from 'lucide-react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function TabLayout() {
@@ -54,13 +54,6 @@ export default function TabLayout() {
                     options={{
                         title: 'Cá nhân',
                         tabBarIcon: ({ color, size }) => <User color={color} size={size} />
-                    }}
-                />
-                <Tabs.Screen
-                    name='support/index'
-                    options={{
-                        title: 'Hỗ trợ',
-                        tabBarIcon: ({ color, size }) => <HelpCircle color={color} size={size} />
                     }}
                 />
             </Tabs>

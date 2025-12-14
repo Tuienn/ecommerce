@@ -26,10 +26,12 @@ import CartService from '@/services/cart.service'
 import { IProduct } from '@/types/product'
 import { CheckoutData } from '@/types/cart'
 import { showNotification } from '@/lib/utils'
+import { useAuth } from '@/hooks/use-auth'
 
 export default function ProductDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>()
     const router = useRouter()
+    const { isAuth } = useAuth()
     const [product, setProduct] = useState<IProduct | null>(null)
     const [loading, setLoading] = useState(true)
     const [dialogOpen, setDialogOpen] = useState(false)
@@ -62,6 +64,12 @@ export default function ProductDetailScreen() {
     }
 
     const handleOpenDialog = () => {
+        // Check authentication before opening dialog
+        if (!isAuth) {
+            showNotification('error', 'Vui lòng đăng nhập để thêm vào giỏ hàng')
+            router.push('/(auth)/(login)/login-by-email')
+            return
+        }
         setQuantity('1')
         setDialogOpen(true)
     }
@@ -97,6 +105,13 @@ export default function ProductDetailScreen() {
     }
 
     const handleBuyNow = () => {
+        // Check authentication before buying
+        if (!isAuth) {
+            showNotification('error', 'Vui lòng đăng nhập để mua hàng')
+            router.push('/(auth)/(login)/login-by-email')
+            return
+        }
+
         if (!product) return
 
         // Create checkout data for single product

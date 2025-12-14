@@ -162,7 +162,7 @@ export default function OrderDetailDialog({ open, onOpenChange, order }: OrderDe
                     <DialogDescription>Mã đơn: #{order._id.slice(-8).toUpperCase()}</DialogDescription>
                 </DialogHeader>
 
-                <ScrollView showsVerticalScrollIndicator={false}>
+                <ScrollView showsVerticalScrollIndicator={false} className='max-h-[500px]'>
                     <View className='gap-4'>
                         {/* Status */}
                         <View className='gap-2'>
