@@ -7,6 +7,7 @@ import categoryRoute from './category/category.route'
 import productRoute from './product/product.route'
 import cartRoute from './cart/cart.route'
 import orderRoute from './order/order.route'
+import reviewRoute from './review/review.route'
 
 const router: RouterType = Router()
 
@@ -17,7 +18,8 @@ const defaultRoutes = [
     { path: '/api/category', route: categoryRoute },
     { path: '/api/product', route: productRoute },
     { path: '/api/cart', route: cartRoute },
-    { path: '/api/order', route: orderRoute }
+    { path: '/api/order', route: orderRoute },
+    { path: '/api/review', route: reviewRoute }
 ]
 
 defaultRoutes.forEach((route) => {

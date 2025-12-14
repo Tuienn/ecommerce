@@ -47,7 +47,7 @@ if (process.env.NODE_ENV === 'production') {
     app.use('/v1', limiter)
 }
 
-app.use(validateBody)
+// app.use(validateBody)
 app.use('/v1', routes)
 
 // 404 handler - replace existing 404 middleware

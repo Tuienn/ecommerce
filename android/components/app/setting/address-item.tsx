@@ -59,7 +59,7 @@ export default function AddressItem({ address, onEdit, onDelete, onSetDefault }:
                         className='flex-1 flex-row items-center justify-center gap-2 rounded-md border border-green-500 bg-green-50 py-2'
                     >
                         <Star size={16} color='#16a34a' />
-                        <Text className='text-sm font-medium text-green-600'>Đặt mặc định</Text>
+                        <Text className='text-sm font-medium text-green-600'>Mặc định</Text>
                     </TouchableOpacity>
                 )}
                 <TouchableOpacity

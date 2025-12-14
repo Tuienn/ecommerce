@@ -5,6 +5,7 @@ import CategoryController from './category/category.controller'
 import ProductController from './product/product.controller'
 import CartController from './cart/cart.controller'
 import OrderController from './order/order.controller'
+import ReviewController from './review/review.controller'
 
 export {
     UserController,
@@ -13,5 +14,6 @@ export {
     CategoryController,
     ProductController,
     CartController,
-    OrderController
+    OrderController,
+    ReviewController
 }
