@@ -104,6 +104,49 @@ class ReviewController {
     }
 
     /**
+     * GET /api/review/check/:orderId/:productId - Kiểm tra đã review chưa
+     */
+    static async checkReviewExists(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?._id?.toString()
+            if (!userId) {
+                throw new BadRequestError(AUTH.USER_NOT_FOUND)
+            }
+
+            const { orderId, productId } = req.params
+
+            if (!Types.ObjectId.isValid(orderId) || !Types.ObjectId.isValid(productId)) {
+                throw new BadRequestError(invalidDataField('orderId hoặc productId'))
+            }
+
+            const data = await ReviewService.checkReviewExists(userId, orderId, productId)
+            return handleSuccess(res, data, 'Kiểm tra review thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
+    /**
+     * GET /api/review/:_id - Lấy review theo ID
+     */
+    static async getReviewById(req: Request, res: Response, next: NextFunction) {
+        try {
+            const reviewId = req.params._id
+
+            if (!Types.ObjectId.isValid(reviewId)) {
+                throw new BadRequestError(invalidDataField('reviewId'))
+            }
+
+            const data = await ReviewService.getReviewById(reviewId)
+            return handleSuccess(res, data, 'Lấy thông tin review thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
+    /**
      * PUT /api/review/:_id - Cập nhật review (user chỉ sửa của mình)
      */
     static async updateReview(req: Request, res: Response, next: NextFunction) {

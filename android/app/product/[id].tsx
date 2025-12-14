@@ -20,6 +20,7 @@ import ImgCarousel from '@/components/app/product/img-carousel'
 import ProductInfo from '@/components/app/product/product-item'
 import ProductDetailSkeleton from '@/components/app/product/product-skeleton'
 import PaymentDialog from '@/components/app/common/payment-dialog'
+import ReviewList from '@/components/app/product/review-list'
 import ProductService from '@/services/product.service'
 import CartService from '@/services/cart.service'
 import { IProduct } from '@/types/product'
@@ -148,6 +149,9 @@ export default function ProductDetailScreen() {
 
                         {/* Product Info */}
                         <ProductInfo product={product} />
+
+                        {/* Reviews */}
+                        <ReviewList productId={product._id} />
                     </ScrollView>
 
                     {/* Bottom Action Buttons */}

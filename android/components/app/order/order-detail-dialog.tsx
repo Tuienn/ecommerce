@@ -1,10 +1,15 @@
-import { View, ScrollView } from 'react-native'
+import { useState, useEffect } from 'react'
+import { View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { Text } from '@/components/ui/text'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { IOrder } from '@/types/order'
+import { IOrder, IOrderItem } from '@/types/order'
 import { formatPrice } from '@/lib/format'
 import { getStatusInfo } from './order-item'
+import { useRouter } from 'expo-router'
+import { Star, Eye, Edit } from 'lucide-react-native'
+import ReviewService from '@/services/review.service'
+import { CheckReviewResponse } from '@/types/review'
 
 interface OrderDetailDialogProps {
     open: boolean
@@ -22,6 +27,21 @@ const getPaymentStatusInfo = (status: string) => {
 }
 
 export default function OrderDetailDialog({ open, onOpenChange, order }: OrderDetailDialogProps) {
+    const router = useRouter()
+    const [reviewStatuses, setReviewStatuses] = useState<Record<string, CheckReviewResponse>>({})
+    const [loadingReviews, setLoadingReviews] = useState(true)
+
+    // Chỉ hiển thị nút đánh giá khi đơn hàng đã hoàn thành
+    const canReview = order?.status === 'COMPLETED'
+
+    // Fetch review status khi mở dialog
+    useEffect(() => {
+        if (open && canReview && order) {
+            checkReviewStatuses()
+        }
+    }, [open, canReview, order?._id])
+
+    // Early return AFTER all hooks
     if (!order) return null
 
     const statusInfo = getStatusInfo(order.status)
@@ -33,6 +53,106 @@ export default function OrderDetailDialog({ open, onOpenChange, order }: OrderDe
         hour: '2-digit',
         minute: '2-digit'
     })
+
+    const checkReviewStatuses = async () => {
+        if (!order) return
+
+        setLoadingReviews(true)
+        const statuses: Record<string, CheckReviewResponse> = {}
+
+        for (const item of order.items) {
+            const productId = typeof item.productId === 'string' ? item.productId : item.productId._id
+            try {
+                const response = await ReviewService.checkReviewExists(order._id, productId)
+                statuses[productId] = response.data
+            } catch (error) {
+                console.error('Error checking review:', error)
+                statuses[productId] = { hasReviewed: false, reviewId: null }
+            }
+        }
+
+        setReviewStatuses(statuses)
+        setLoadingReviews(false)
+    }
+
+    const handleCreateReview = (item: IOrderItem) => {
+        // Lấy productId - có thể là string hoặc object
+        const productId = typeof item.productId === 'string' ? item.productId : item.productId._id
+        const productName = item.name
+
+        // Đóng dialog trước
+        onOpenChange(false)
+
+        // Đợi dialog đóng hoàn toàn rồi mới navigate
+        setTimeout(() => {
+            // Encode params để tránh lỗi với ký tự đặc biệt
+            const encodedProductName = encodeURIComponent(productName)
+            router.push(`/review/create?orderId=${order._id}&productId=${productId}&productName=${encodedProductName}`)
+        }, 300)
+    }
+
+    const handleViewReview = (reviewId: string) => {
+        onOpenChange(false)
+        setTimeout(() => {
+            router.push(`/review/view?reviewId=${reviewId}`)
+        }, 300)
+    }
+
+    const handleEditReview = (reviewId: string) => {
+        onOpenChange(false)
+        setTimeout(() => {
+            router.push(`/review/edit?reviewId=${reviewId}`)
+        }, 300)
+    }
+
+    const renderReviewButtons = (item: IOrderItem) => {
+        const productId = typeof item.productId === 'string' ? item.productId : item.productId._id
+        const status = reviewStatuses[productId]
+
+        if (loadingReviews) {
+            return (
+                <View className='mt-3 items-center py-2'>
+                    <ActivityIndicator size='small' color='#16a34a' />
+                </View>
+            )
+        }
+
+        if (!status?.hasReviewed) {
+            // Chưa review - hiển thị nút Đánh giá
+            return (
+                <TouchableOpacity
+                    onPress={() => handleCreateReview(item)}
+                    className='mt-3 flex-row items-center justify-center gap-2 rounded-md border border-green-600 bg-green-50 py-2 active:bg-green-100'
+                    activeOpacity={0.7}
+                >
+                    <Star size={16} color='#16a34a' />
+                    <Text className='text-sm font-medium text-green-600'>Đánh giá</Text>
+                </TouchableOpacity>
+            )
+        }
+
+        // Đã review - hiển thị 2 nút
+        return (
+            <View className='mt-3 flex-row gap-2'>
+                <TouchableOpacity
+                    onPress={() => handleViewReview(status.reviewId!)}
+                    className='flex-1 flex-row items-center justify-center gap-2 rounded-md border border-blue-600 bg-blue-50 py-2 active:bg-blue-100'
+                    activeOpacity={0.7}
+                >
+                    <Eye size={16} color='#2563eb' />
+                    <Text className='text-sm font-medium text-blue-600'>Xem</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => handleEditReview(status.reviewId!)}
+                    className='flex-1 flex-row items-center justify-center gap-2 rounded-md border border-orange-600 bg-orange-50 py-2 active:bg-orange-100'
+                    activeOpacity={0.7}
+                >
+                    <Edit size={16} color='#ea580c' />
+                    <Text className='text-sm font-medium text-orange-600'>Sửa</Text>
+                </TouchableOpacity>
+            </View>
+        )
+    }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -77,6 +197,7 @@ export default function OrderDetailDialog({ open, onOpenChange, order }: OrderDe
                                             <Text className='text-xs text-red-500'>-{item.discountPercent}%</Text>
                                         </View>
                                     )}
+                                    {canReview && renderReviewButtons(item)}
                                 </View>
                             ))}
                         </View>

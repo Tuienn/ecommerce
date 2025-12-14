@@ -17,3 +17,10 @@ export interface CreateReviewData {
     rating: number
     comment?: string
 }
+
+export interface CheckReviewResponse {
+    hasReviewed: boolean
+    reviewId: string | null
+}
+
+export type ReviewMode = 'create' | 'view' | 'edit'

@@ -79,7 +79,7 @@ class ReviewService {
         }
 
         const reviews = await OrderReview.find({ productId: new Types.ObjectId(productId) })
-            .populate('userId', 'name')
+            .populate('userId', 'name email')
             .limit(limit)
             .skip((page - 1) * limit)
             .sort({ createdAt: -1 })
@@ -182,6 +182,22 @@ class ReviewService {
                 total,
                 totalPages: Math.ceil(total / limit)
             }
+        }
+    }
+
+    /**
+     * Kiểm tra user đã review product trong order chưa
+     */
+    static async checkReviewExists(userId: string, orderId: string, productId: string) {
+        const review = await OrderReview.findOne({
+            userId: new Types.ObjectId(userId),
+            orderId: new Types.ObjectId(orderId),
+            productId: new Types.ObjectId(productId)
+        })
+
+        return {
+            hasReviewed: !!review,
+            reviewId: review?._id?.toString() || null
         }
     }
 }

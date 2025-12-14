@@ -197,6 +197,30 @@ class OrderService {
             throw new BadRequestError(`Không thể chuyển từ trạng thái ${currentStatus} sang ${status}`)
         }
 
+        // Nếu chuyển sang COMPLETED, cập nhật soldCount và giảm stock
+        if (status === 'COMPLETED' && currentStatus !== 'COMPLETED') {
+            for (const item of order.items) {
+                await Product.findByIdAndUpdate(item.productId, {
+                    $inc: {
+                        soldCount: item.quantity,
+                        stock: -item.quantity
+                    }
+                })
+            }
+        }
+
+        // Nếu từ COMPLETED chuyển về trạng thái khác (rollback), hoàn lại stock
+        if (currentStatus === 'COMPLETED' && status !== 'COMPLETED') {
+            for (const item of order.items) {
+                await Product.findByIdAndUpdate(item.productId, {
+                    $inc: {
+                        soldCount: -item.quantity,
+                        stock: item.quantity
+                    }
+                })
+            }
+        }
+
         order.status = status
         await order.save()
 

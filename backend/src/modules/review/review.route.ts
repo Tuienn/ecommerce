@@ -22,6 +22,17 @@ router.post(
 // Customer routes - Lấy reviews của mình
 router.get('/me', authenticateToken, authorize('customer'), asyncHandler(ReviewController.getMyReviews))
 
+// Customer routes - Kiểm tra đã review chưa
+router.get(
+    '/check/:orderId/:productId',
+    authenticateToken,
+    authorize('customer'),
+    asyncHandler(ReviewController.checkReviewExists)
+)
+
+// Customer routes - Lấy review theo ID
+router.get('/:_id', authenticateToken, authorize('customer'), asyncHandler(ReviewController.getReviewById))
+
 // Customer routes - Cập nhật review với upload ảnh/video mới
 router.put(
     '/:_id/upload',

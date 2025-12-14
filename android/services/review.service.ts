@@ -91,7 +91,7 @@ class ReviewService {
     }
 
     /**
-     * Lấy reviews theo product
+     * Lấy reviews theo product (public - không cần auth)
      */
     static async getReviewsByProduct(productId: string, page: number = 1, limit: number = 10) {
         return apiService(`/review/product/${productId}?page=${page}&limit=${limit}`)
@@ -102,6 +102,20 @@ class ReviewService {
      */
     static async getMyReviews(page: number = 1, limit: number = 10) {
         return apiService(`/review/me?page=${page}&limit=${limit}`)
+    }
+
+    /**
+     * Kiểm tra đã review chưa
+     */
+    static async checkReviewExists(orderId: string, productId: string) {
+        return apiService(`/review/check/${orderId}/${productId}`)
+    }
+
+    /**
+     * Lấy review theo ID
+     */
+    static async getReviewById(reviewId: string) {
+        return apiService(`/review/${reviewId}`)
     }
 }
 

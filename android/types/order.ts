@@ -2,7 +2,7 @@ export type OrderStatus = 'PROCESSING' | 'PAID' | 'FAILED' | 'CANCELLED' | 'SHIP
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED'
 
 export interface IOrderItem {
-    productId: string
+    productId: string | { _id: string; name: string; images?: string[]; price?: number }
     name: string
     price: number
     quantity: number
