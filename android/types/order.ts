@@ -45,6 +45,7 @@ export interface IOrder {
     shippingAddress: IShippingAddress
     status: OrderStatus
     payment: IPayment
+    cancelReason?: string
     createdAt: string
     updatedAt: string
 }

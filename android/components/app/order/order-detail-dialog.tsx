@@ -232,6 +232,16 @@ export default function OrderDetailDialog({ open, onOpenChange, order }: OrderDe
                             </View>
                         </View>
 
+                        {/* Cancel Reason */}
+                        {order.status === 'CANCELLED' && order.cancelReason && (
+                            <View className='gap-2'>
+                                <Text className='text-sm font-medium text-gray-700'>Lý do hủy đơn</Text>
+                                <View className='rounded-lg border border-red-200 bg-red-50 p-3'>
+                                    <Text className='text-sm text-red-800'>{order.cancelReason}</Text>
+                                </View>
+                            </View>
+                        )}
+
                         {/* Total Summary */}
                         <View className='gap-2 rounded-lg border border-green-200 bg-green-50 p-3'>
                             {order.baseTotal > order.total - order.shippingFee && (

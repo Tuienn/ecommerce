@@ -18,9 +18,10 @@ class OrderService {
         return apiService(`/order/${orderId}`)
     }
 
-    static async cancelOrder(orderId: string) {
+    static async cancelOrder(orderId: string, cancelReason?: string) {
         return apiService(`/order/${orderId}/cancel`, {
-            method: 'POST'
+            method: 'POST',
+            body: JSON.stringify({ cancelReason })
         })
     }
 }

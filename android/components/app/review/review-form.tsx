@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, ScrollView, TouchableOpacity, Image, ActivityIndicator, TextInput } from 'react-native'
+import { View, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Text } from '@/components/ui/text'
@@ -9,6 +9,7 @@ import * as ImagePicker from 'expo-image-picker'
 import ReviewService from '@/services/review.service'
 import { showNotification } from '@/lib/utils'
 import { ReviewMode, IOrderReview } from '@/types/review'
+import { Textarea } from '@/components/ui/textarea'
 
 interface ReviewFormProps {
     mode: ReviewMode
@@ -39,7 +40,6 @@ export default function ReviewForm({
     const [submitting, setSubmitting] = useState(false)
 
     const isReadOnly = mode === 'view'
-    const isEdit = mode === 'edit'
 
     useEffect(() => {
         ;(async () => {
@@ -179,7 +179,11 @@ export default function ReviewForm({
                     </TouchableOpacity>
                     <View className='flex-1'>
                         <Text className='text-lg font-semibold'>
-                            {mode === 'create' ? 'Đánh giá sản phẩm' : mode === 'view' ? 'Chi tiết đánh giá' : 'Sửa đánh giá'}
+                            {mode === 'create'
+                                ? 'Đánh giá sản phẩm'
+                                : mode === 'view'
+                                  ? 'Chi tiết đánh giá'
+                                  : 'Sửa đánh giá'}
                         </Text>
                         <Text className='mt-1 text-sm text-gray-600' numberOfLines={1}>
                             {productName}
@@ -225,15 +229,10 @@ export default function ReviewForm({
                     {/* Comment */}
                     <View className='gap-2'>
                         <Text className='text-sm font-medium text-gray-700'>Nhận xét (không bắt buộc)</Text>
-                        <TextInput
+                        <Textarea
                             value={comment}
                             onChangeText={setComment}
                             placeholder='Chia sẻ trải nghiệm của bạn về sản phẩm...'
-                            placeholderTextColor='#9ca3af'
-                            multiline
-                            numberOfLines={6}
-                            textAlignVertical='top'
-                            className='min-h-[120px] rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-900'
                             maxLength={500}
                             editable={!isReadOnly}
                         />
@@ -298,4 +297,3 @@ export default function ReviewForm({
         </SafeAreaView>
     )
 }
-

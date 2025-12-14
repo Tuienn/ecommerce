@@ -40,7 +40,8 @@ const OrderSchema = new Schema<IOrder>(
             enum: ['PROCESSING', 'PAID', 'FAILED', 'CANCELLED', 'SHIPPING', 'COMPLETED'],
             default: 'PROCESSING'
         },
-        payment: PaymentSchema
+        payment: PaymentSchema,
+        cancelReason: { type: String }
     },
     { timestamps: true }
 )

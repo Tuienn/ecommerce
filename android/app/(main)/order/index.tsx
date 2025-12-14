@@ -144,7 +144,9 @@ export default function OrderScreen() {
         return (
             <FlatList
                 data={orderList}
-                renderItem={({ item }) => <OrderItem order={item} onPress={handleOrderPress} />}
+                renderItem={({ item }) => (
+                    <OrderItem order={item} onPress={handleOrderPress} onOrderCancelled={() => handleRefresh(status)} />
+                )}
                 keyExtractor={(item) => item._id}
                 onEndReached={() => handleLoadMore(status)}
                 onEndReachedThreshold={0.5}

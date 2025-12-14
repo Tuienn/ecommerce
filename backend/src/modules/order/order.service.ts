@@ -256,7 +256,7 @@ class OrderService {
         return order.toObject()
     }
 
-    static async cancelOrder(orderId: string) {
+    static async cancelOrder(orderId: string, cancelReason?: string) {
         const order = await Order.findById(orderId)
         if (!order) {
             throw new NotFoundError('Không tìm thấy đơn hàng')
@@ -267,9 +267,12 @@ class OrderService {
             throw new BadRequestError('Chỉ có thể hủy đơn hàng ở trạng thái PROCESSING hoặc PAID')
         }
 
-        // Update status
+        // Update status and cancel reason
         order.status = 'CANCELLED'
-        order.payment.status = 'CANCELLED'
+
+        if (cancelReason) {
+            order.cancelReason = cancelReason
+        }
         await order.save()
 
         // Hoàn trả stock cho các products

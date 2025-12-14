@@ -15,6 +15,7 @@ import {
     DialogTitle
 } from '@/components/ui/dialog'
 import { IAddress } from '@/types/user'
+import { Textarea } from '@/components/ui/textarea'
 
 interface AddressFormDialogProps {
     open: boolean
@@ -108,12 +109,10 @@ export default function AddressFormDialog({ open, onOpenChange, address, onSave,
                         {/* Address Line */}
                         <View className='gap-2'>
                             <Label className='text-sm font-medium'>Địa chỉ *</Label>
-                            <Input
+                            <Textarea
                                 value={formData.addressLine}
                                 onChangeText={(text) => setFormData((prev) => ({ ...prev, addressLine: text }))}
                                 placeholder='Số nhà, tên đường'
-                                multiline
-                                numberOfLines={2}
                             />
                         </View>
 

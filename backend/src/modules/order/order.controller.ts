@@ -156,8 +156,9 @@ class OrderController {
     static async cancelOrder(req: Request, res: Response, next: NextFunction) {
         try {
             const orderId = req.params.id
+            const { cancelReason } = req.body
 
-            const data = await OrderService.cancelOrder(orderId)
+            const data = await OrderService.cancelOrder(orderId, cancelReason)
             return handleSuccess(res, data, 'Hủy đơn hàng thành công')
         } catch (error) {
             next(error)

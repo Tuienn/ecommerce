@@ -34,6 +34,7 @@ export interface IOrder extends Document {
     shippingAddress: IAddress
     status: OrderStatus
     payment: IPayment
+    cancelReason?: string
     createdAt: Date
     updatedAt: Date
 }

@@ -252,7 +252,6 @@ const CartScreen = () => {
                         <Text>Đăng nhập ngay</Text>
                     </Button>
                 </View>
-                Ư
             </View>
         )
     }
