@@ -30,6 +30,8 @@ export const apiService = async <T = any>(url: string, options?: RequestInit, _r
         headers: mergedHeaders
     })
 
+    if (!res.ok) throw new Error(await res.text())
+
     const data = await res.json()
 
     if (res.ok) {
