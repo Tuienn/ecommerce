@@ -1,6 +1,7 @@
 import { Order, OrderReview, Product } from '../index.model'
 import { BadRequestError, ConflictRequestError, NotFoundError } from '../../exceptions/error.handler'
 import { Types } from 'mongoose'
+import { saveImagesToDestroyedCollection } from '../../helpers/cloudinary'
 
 class ReviewService {
     /**
@@ -109,7 +110,9 @@ class ReviewService {
      * Lấy review theo ID
      */
     static async getReviewById(reviewId: string) {
-        const review = await OrderReview.findById(reviewId).populate('userId', 'name').populate('productId', 'name images')
+        const review = await OrderReview.findById(reviewId)
+            .populate('userId', 'name')
+            .populate('productId', 'name images')
 
         if (!review) {
             throw new NotFoundError('Không tìm thấy đánh giá')
@@ -122,10 +125,26 @@ class ReviewService {
      * Xóa review (Admin only)
      */
     static async deleteReview(reviewId: string) {
-        const review = await OrderReview.findByIdAndDelete(reviewId)
+        // Get review first to access images
+        const review = await OrderReview.findById(reviewId)
         if (!review) {
             throw new NotFoundError('Không tìm thấy đánh giá')
         }
+
+        // Save images to destroyed collection before deleting review
+        if (review.images && review.images.length > 0) {
+            try {
+                const saveResult = await saveImagesToDestroyedCollection(review.images, 'review_deleted')
+                if (!saveResult) {
+                    console.warn(`Some images may not be saved to destroyed collection for review: ${reviewId}`)
+                }
+            } catch (error) {
+                console.error('Error saving review images to destroyed collection:', error)
+                // Don't throw error to not block review deletion
+            }
+        }
+
+        await OrderReview.findByIdAndDelete(reviewId)
         return true
     }
 
@@ -150,9 +169,31 @@ class ReviewService {
             throw new NotFoundError('Không tìm thấy đánh giá hoặc bạn không có quyền sửa')
         }
 
+        // Handle image updates - save old images to destroyed collection
+        if (data.images !== undefined) {
+            const oldImages = review.images || []
+            const newImages = data.images
+
+            // Find images that are no longer in the new list
+            const imagesToDelete = oldImages.filter((oldImg) => !newImages.includes(oldImg))
+
+            // Save old images to destroyed-img collection
+            if (imagesToDelete.length > 0) {
+                try {
+                    const saveResult = await saveImagesToDestroyedCollection(imagesToDelete, 'review_updated')
+                    if (!saveResult) {
+                        console.warn(`Some old images may not be saved to destroyed collection for review: ${reviewId}`)
+                    }
+                } catch (error) {
+                    console.error('Error saving old review images to destroyed collection:', error)
+                }
+            }
+
+            review.images = newImages
+        }
+
         if (data.rating !== undefined) review.rating = data.rating
         if (data.comment !== undefined) review.comment = data.comment
-        if (data.images !== undefined) review.images = data.images
         review.isEdited = true
 
         await review.save()
