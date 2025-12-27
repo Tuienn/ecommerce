@@ -25,7 +25,7 @@ export const apiService = async <T = any>(url: string, options?: RequestInit, _r
         mergedHeaders.set('Authorization', `Bearer ${token}`)
     }
 
-    const res = await fetch(`${BASE_URL}${url}`, {
+    const res = await fetch(`${BASE_URL}/v1/api${url}`, {
         ...options,
         headers: mergedHeaders
     })
