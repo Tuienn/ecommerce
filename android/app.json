@@ -40,7 +40,8 @@
           "configureAndroidBackup": true,
           "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
