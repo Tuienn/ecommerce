@@ -1,4 +1,4 @@
-import OTPService from './otp.service'
+import { OTPService } from '../../index.service'
 import { handleSuccess } from '../../../utils/handleRes'
 import { registerOTPTemplate, sendMail } from '../../../utils/sendMail'
 import { BadRequestError } from '../../../exceptions/error.handler'

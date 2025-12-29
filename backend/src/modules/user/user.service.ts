@@ -18,7 +18,7 @@ class UserService {
                 email: DEFAULT_EMAIL_ADMIN,
                 password: DEFAULT_PASSWORD_ADMIN,
                 role: 'admin',
-                phone: '0942029135'
+                phone: '0942029130'
             })
 
             console.log('Default admin user created successfully')

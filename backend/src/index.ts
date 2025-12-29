@@ -20,7 +20,12 @@ const server = http.createServer(app)
 
 app.use(helmet())
 
-app.use(cors({}))
+app.use(
+    cors({
+        origin: process.env.CORS_ORIGIN?.split(',') || [],
+        credentials: true
+    })
+)
 
 app.use((_req, res, next) => {
     res.setHeader('X-Robots-Tag', 'noindex, nofollow')

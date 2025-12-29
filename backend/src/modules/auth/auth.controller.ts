@@ -1,4 +1,4 @@
-import AuthService from './auth.service'
+import { AuthService } from '../index.service'
 import { handleSuccess } from '../../utils/handleRes'
 import { BadRequestError } from '../../exceptions/error.handler'
 import { isValidEmail, isValidPassword, isValidPhoneNumber } from '../../utils/validate'

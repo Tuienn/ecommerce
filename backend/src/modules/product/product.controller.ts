@@ -1,4 +1,4 @@
-import ProductService from './product.service'
+import { ProductService } from '../index.service'
 import { handleSuccess } from '../../utils/handleRes'
 import { Request, Response, NextFunction } from 'express'
 import { invalidDataField, missingDataField } from '../../constants/text'
