@@ -8,7 +8,8 @@ import {
     MenuUnfoldOutlined,
     TeamOutlined,
     UserOutlined,
-    ShoppingCartOutlined
+    ShoppingCartOutlined,
+    WechatWorkOutlined
 } from '@ant-design/icons'
 import { Avatar, Drawer, Grid, Layout, Menu, Popconfirm, Tooltip } from 'antd'
 import { useState } from 'react'
@@ -81,7 +82,8 @@ const BasicLayout = ({ children }) => {
         getItem(<Link to='/category-management'>Danh mục</Link>, 'category-management', <TeamOutlined />),
         getItem(<Link to='/product-management'>Sản phẩm</Link>, 'product-management', <ProductOutlined />),
         getItem(<Link to='/user-management'>Người dùng</Link>, 'user-management', <UserOutlined />),
-        getItem(<Link to='/order-management'>Đơn hàng</Link>, 'order-management', <ShoppingCartOutlined />)
+        getItem(<Link to='/order-management'>Đơn hàng</Link>, 'order-management', <ShoppingCartOutlined />),
+        getItem(<Link to='/chat-support'>Hỗ trợ</Link>, 'chat-support', <WechatWorkOutlined />)
     ]
     return (
         <>
