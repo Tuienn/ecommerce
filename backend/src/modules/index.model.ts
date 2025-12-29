@@ -7,5 +7,8 @@ import DestroyedImage from './destroyedImage/destroyedImage.model'
 import Cart from './cart/cart.model'
 import Order from './order/order.model'
 import OrderReview from './review/review.model'
+import Chat from './chat/chat.model'
+import Message from './message/message.model'
+import UserChatKey from './userChatKey/userChatkey.model'
 
-export { User, Auth, OTP, Category, Product, DestroyedImage, Cart, Order, OrderReview }
+export { User, Auth, OTP, Category, Product, DestroyedImage, Cart, Order, OrderReview, Chat, Message, UserChatKey }
