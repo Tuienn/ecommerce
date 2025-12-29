@@ -1,22 +1,24 @@
 import {
-    BookOutlined,
     CloseOutlined,
-    FileSearchOutlined,
     GithubOutlined,
-    HomeOutlined,
+    ProductOutlined,
     LinkOutlined,
     LogoutOutlined,
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     TeamOutlined,
-    UserOutlined
+    UserOutlined,
+    ShoppingCartOutlined
 } from '@ant-design/icons'
-import { Avatar, Button, Drawer, Grid, Layout, Menu, Popconfirm, Tooltip } from 'antd'
-import React, { useState } from 'react'
+import { Avatar, Drawer, Grid, Layout, Menu, Popconfirm, Tooltip } from 'antd'
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import logoXrm from '../assets/svg/xrm.svg'
 import { getFirstLetterName } from '../lib/utils'
-import { clearToken } from '../lib/handleStorage'
+import { clearToken, getAuthToken } from '../lib/handleStorage'
+import { useMutation } from '@tanstack/react-query'
+import { useApp } from '../components/provider/AppProvider'
+import AuthService from '../services/auth.service'
 
 const { Content, Sider, Header } = Layout
 
@@ -33,10 +35,23 @@ const { useBreakpoint } = Grid
 
 const BasicLayout = ({ children }) => {
     const [collapsed, setCollapsed] = useState(false)
+    const authToken = getAuthToken()
+    const { showNotification } = useApp()
     const [openDrawer, setOpenDrawer] = useState(false)
     const { xs } = useBreakpoint()
     const nagivate = useNavigate()
     const { pathname } = useLocation()
+
+    const mutationLogout = useMutation({
+        mutationFn: () => AuthService.logout(authToken.refreshToken),
+        onSuccess: () => {
+            clearToken()
+            nagivate('/login')
+        },
+        onError: () => {
+            showNotification('error', 'Đăng xuất thất bại')
+        }
+    })
 
     const drawerMenu = [
         getItem(<p>Thông tin</p>, 'information', <UserOutlined />),
@@ -47,8 +62,7 @@ const BasicLayout = ({ children }) => {
         getItem(
             <Popconfirm
                 onConfirm={() => {
-                    clearToken()
-                    nagivate('/login')
+                    mutationLogout.mutate()
                 }}
                 title='Đăng xuất'
                 okText='Xác nhận'
@@ -64,10 +78,10 @@ const BasicLayout = ({ children }) => {
     ]
 
     const siderMenu = [
-        getItem(<Link to='/'>Trang chủ</Link>, 'dashboard', <HomeOutlined />),
-        getItem(<Link to='/student-management'>Quản lý sinh viên</Link>, 'student-management', <TeamOutlined />),
-        getItem(<Link to='/course-management'>Quản lý khóa học</Link>, 'course-management', <BookOutlined />),
-        getItem(<Link to='/score-management'>Quản lý môn học</Link>, 'score-management', <FileSearchOutlined />)
+        getItem(<Link to='/category-management'>Danh mục</Link>, 'category-management', <TeamOutlined />),
+        getItem(<Link to='/product-management'>Sản phẩm</Link>, 'product-management', <ProductOutlined />),
+        getItem(<Link to='/user-management'>Người dùng</Link>, 'user-management', <UserOutlined />),
+        getItem(<Link to='/order-management'>Đơn hàng</Link>, 'order-management', <ShoppingCartOutlined />)
     ]
     return (
         <>

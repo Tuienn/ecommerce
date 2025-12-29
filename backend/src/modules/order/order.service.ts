@@ -176,6 +176,39 @@ class OrderService {
         return order.toObject()
     }
 
+    // Admin: Lấy tất cả đơn hàng
+    static async getAllOrdersAdmin(query: { page?: number; limit?: number; status?: string; userId?: string }) {
+        const { page = 1, limit = 10, status, userId } = query
+        const filter: any = {}
+
+        if (status) {
+            filter.status = status
+        }
+
+        if (userId) {
+            filter.userId = new Types.ObjectId(userId)
+        }
+
+        const orders = await Order.find(filter)
+            .populate('items.productId', 'name images price')
+            .populate('userId', 'name email phone')
+            .limit(limit)
+            .skip((page - 1) * limit)
+            .sort({ createdAt: -1 })
+
+        const total = await Order.countDocuments(filter)
+
+        return {
+            data: orders,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
+        }
+    }
+
     static async updateOrderStatus(orderId: string, status: OrderStatus) {
         const order = await Order.findById(orderId)
         if (!order) {
@@ -195,6 +228,11 @@ class OrderService {
 
         if (!validTransitions[currentStatus].includes(status)) {
             throw new BadRequestError(`Không thể chuyển từ trạng thái ${currentStatus} sang ${status}`)
+        }
+
+        // Không cho phép chuyển sang PAID nếu thanh toán chưa thành công
+        if (status === 'PAID' && order.payment.status !== 'SUCCESS') {
+            throw new BadRequestError('Không thể chuyển sang trạng thái PAID khi thanh toán chưa thành công')
         }
 
         // Nếu chuyển sang COMPLETED, cập nhật soldCount và giảm stock

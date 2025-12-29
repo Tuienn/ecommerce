@@ -33,7 +33,7 @@ const Routes = () => {
             ),
             children: [
                 {
-                    index: true, // Mặc định vào trang blogs, nếu vào '/' -> redirect sang /blogs
+                    index: true, // Mặc định vào trang category, nếu vào '/' -> redirect sang /blogs
                     element: <Navigate to='/blogs' replace />
                 },
                 ...UserRoutes
@@ -50,8 +50,8 @@ const Routes = () => {
             ),
             children: [
                 {
-                    index: true, // Mặc định vào trang quản lý blogs, nếu vào '/' -> redirect sang /blogs
-                    element: <Navigate to='/blogs-management' replace />
+                    index: true, // Mặc định vào trang quản lý danh mục
+                    element: <Navigate to='/category-management' replace />
                 },
                 ...AdminRoutes
             ]

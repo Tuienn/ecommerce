@@ -5,7 +5,12 @@ import { clearToken, getAccessToken, getAuthToken, saveAccessToken } from '../li
 const API = axios.create({
     baseURL: import.meta.env['VITE_API_SERVICE_URL'] + '/v1/api',
     responseType: 'json',
-    timeout: 20000
+    timeout: 20000,
+    headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+    }
 })
 
 // Request interceptor để add token động
@@ -49,7 +54,7 @@ export const apiService = async (method, url, params, data) => {
                         method: 'post',
                         url: '/auth/refresh-token',
                         data: {
-                            refresh_token: refreshToken
+                            refreshToken: refreshToken
                         },
                         headers: {
                             'Content-Type': 'application/json'
@@ -57,11 +62,11 @@ export const apiService = async (method, url, params, data) => {
                     })
 
                     if (res.data.code === 200) {
-                        const access_token = res.data.data.access_token
-                        saveAccessToken(access_token)
+                        const accessToken = res.data.data.accessToken
+                        saveAccessToken(accessToken)
 
                         // Update token cho original request
-                        originalRequest.headers.Authorization = `Bearer ${access_token}`
+                        originalRequest.headers.Authorization = `Bearer ${accessToken}`
                         return API(originalRequest)
                     }
 

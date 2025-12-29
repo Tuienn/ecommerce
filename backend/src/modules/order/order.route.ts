@@ -17,6 +17,7 @@ router.get('/:id', authorize('customer'), asyncHandler(OrderController.getOrderB
 router.post('/:id/cancel', authorize('customer'), asyncHandler(OrderController.cancelOrder))
 
 // Admin only routes
+router.get('/admin/all', authorize('admin'), asyncHandler(OrderController.getAllOrdersAdmin))
 router.put('/:id/update-order-status', authorize('admin'), asyncHandler(OrderController.updateOrderStatus))
 router.put('/:id/verify-bank-status', authorize('admin'), asyncHandler(OrderController.verifyBankStatus))
 

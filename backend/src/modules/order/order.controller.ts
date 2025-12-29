@@ -109,6 +109,22 @@ class OrderController {
         }
     }
 
+    // Admin: Lấy tất cả đơn hàng
+    static async getAllOrdersAdmin(req: Request, res: Response, next: NextFunction) {
+        try {
+            const page = req.query.page ? parseInt(req.query.page as string) : 1
+            const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
+            const status = req.query.status as string
+            const userId = req.query.userId as string
+
+            const data = await OrderService.getAllOrdersAdmin({ page, limit, status, userId })
+            return handleSuccess(res, data, 'Lấy danh sách đơn hàng thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
     static async updateOrderStatus(req: Request, res: Response, next: NextFunction) {
         try {
             const orderId = req.params.id

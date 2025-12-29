@@ -25,8 +25,13 @@ const Login = () => {
     const mutationLogin = useMutation({
         mutationFn: (data) => AuthService.login(data),
         onSuccess: (data) => {
-            saveAccessToken(data.accessToken)
-            saveAuthToken(data.refreshToken, data.user)
+            console.log('🚀 ~ Login ~ data:', data)
+            saveAccessToken(data.data.accessToken)
+            saveAuthToken(data.data.refreshToken, {
+                role: data.data.role,
+                name: data.data.name,
+                email: data.data.email
+            })
             showNotification('success', 'Đăng nhập thành công')
             debounce(() => {
                 window.location.reload()

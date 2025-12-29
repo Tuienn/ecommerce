@@ -11,7 +11,7 @@ const PageNotFound = () => {
             title={404}
             subTitle={'Không tìm thấy trang'}
             extra={
-                <Button type='primary' onClick={() => nagivate('/')} icon={<HomeOutlined />}>
+                <Button type='primary' onClick={() => nagivate('/category-management')} icon={<HomeOutlined />}>
                     Trang chủ
                 </Button>
             }
