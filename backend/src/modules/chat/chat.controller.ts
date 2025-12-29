@@ -8,12 +8,14 @@ import { BadRequestError, ForbiddenError } from '../../exceptions/error.handler'
 class ChatController {
     /**
      * Create or get chat between 2 users
+     * At least one participant must be admin
      * POST /api/chat/create
      */
     static async createOrGetChat(req: Request, res: Response, next: NextFunction) {
         try {
             const { participantIds } = req.body
             const currentUserId = req.user?._id?.toString()
+            const currentUserRole = req.user?.role
 
             if (!currentUserId) {
                 throw new BadRequestError(AUTH.USER_NOT_FOUND)
@@ -28,7 +30,7 @@ class ChatController {
                 throw new ForbiddenError('Bạn phải là một trong các participants')
             }
 
-            const chat = await ChatService.createOrGetChat(participantIds)
+            const chat = await ChatService.createOrGetChat(participantIds, currentUserRole!)
 
             // Get public keys for all participants
             const participantsWithKeys = await Promise.all(
@@ -51,6 +53,20 @@ class ChatController {
             }
 
             return handleSuccess(res, result, 'Tạo/lấy chat thành công', StatusCodes.OK)
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
+    /**
+     * Get all chats (admin only)
+     * GET /api/chat/admin/all-chats
+     */
+    static async getAllChatsAdmin(_req: Request, res: Response, next: NextFunction) {
+        try {
+            const data = await ChatService.getAllChats()
+            return handleSuccess(res, data, 'Lấy tất cả chats thành công')
         } catch (error) {
             next(error)
             return

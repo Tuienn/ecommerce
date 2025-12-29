@@ -89,6 +89,37 @@ class MessageService {
     }
 
     /**
+     * Get all messages (admin only)
+     */
+    static async getAllMessages(cursor?: string, limit: number = 50): Promise<PaginatedMessagesResult> {
+        const query: any = {}
+
+        if (cursor && Types.ObjectId.isValid(cursor)) {
+            query._id = { $lt: new Types.ObjectId(cursor) }
+        }
+
+        const messages = await Message.find(query)
+            .sort({ _id: -1 })
+            .limit(limit + 1)
+            .populate('senderId', 'name email role')
+            .populate('chatId', 'participants')
+            .lean()
+
+        const hasMore = messages.length > limit
+        if (hasMore) {
+            messages.pop()
+        }
+
+        const nextCursor = messages.length > 0 ? String(messages[messages.length - 1]._id) : null
+
+        return {
+            messages,
+            hasMore,
+            nextCursor
+        }
+    }
+
+    /**
      * Save a new message (called from socket handler)
      */
     static async saveMessage(
