@@ -20,7 +20,8 @@ const PaymentSchema = new Schema<IPayment>(
         provider: { type: String, enum: ['MOMO', 'VNPAY'], required: true },
         amount: { type: Number, required: true },
         status: { type: String, enum: ['PENDING', 'SUCCESS', 'FAILED'], default: 'PENDING' },
-        transactionId: { type: String, index: true }
+        transactionId: { type: String },
+        dek: { type: String } // DEK for transactionId encryption
     },
     { _id: false, timestamps: true }
 )

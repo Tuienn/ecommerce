@@ -28,6 +28,7 @@ export default class KeyManagementApiService {
 
     static async decryptDataByApi(obj: any, encryptedKey: string) {
         const { plainKey } = await KeyManagementApiService.decryptDek(encryptedKey)
-        return decryptData(obj, plainKey)
+        const result = decryptData(obj, plainKey)
+        return result
     }
 }

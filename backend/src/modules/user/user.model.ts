@@ -8,8 +8,7 @@ export const addressSchema = new Schema<IAddress>(
         name: {
             type: String,
             required: true,
-            trim: true,
-            maxlength: 100
+            trim: true
         },
         phone: {
             type: String,
@@ -19,8 +18,7 @@ export const addressSchema = new Schema<IAddress>(
         addressLine: {
             type: String,
             required: true,
-            trim: true,
-            maxlength: 500
+            trim: true
         },
         city: {
             type: String,
@@ -48,6 +46,12 @@ export const addressSchema = new Schema<IAddress>(
                 type: [Number],
                 default: [0, 0]
             }
+        },
+        dek: {
+            type: String,
+            trim: true,
+            maxlength: 500,
+            required: true
         }
     },
     { _id: true }

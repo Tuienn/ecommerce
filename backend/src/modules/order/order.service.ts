@@ -1,9 +1,49 @@
 import { Order, Product, User, Cart } from '../index.model'
 import { BadRequestError, NotFoundError } from '../../exceptions/error.handler'
-import { IOrderItem, OrderStatus, PaymentStatus } from '../../types/order'
+import { IOrder, IOrderItem, OrderStatus, PaymentStatus } from '../../types/order'
 import { Types } from 'mongoose'
+import KeyManagementApiService from '../../httpClients/keyManagement/keyManagement.service'
 
 class OrderService {
+    /**
+     * Helper function để giải mã các trường nhạy cảm trong order
+     */
+    private static async decryptOrderData(order: IOrder): Promise<any> {
+        const decryptedOrder = { ...order }
+
+        // Giải mã shippingAddress
+        if (order.shippingAddress?.dek) {
+            const decryptedAddress = await KeyManagementApiService.decryptDataByApi(
+                {
+                    name: order.shippingAddress.name,
+                    phone: order.shippingAddress.phone,
+                    addressLine: order.shippingAddress.addressLine
+                },
+                order.shippingAddress.dek
+            )
+            decryptedOrder.shippingAddress = {
+                ...order.shippingAddress,
+                name: decryptedAddress.name,
+                phone: decryptedAddress.phone,
+                addressLine: decryptedAddress.addressLine
+            }
+        }
+
+        // Giải mã transactionId
+        if (order.payment?.dek && order.payment?.transactionId) {
+            const decryptedPayment = await KeyManagementApiService.decryptDataByApi(
+                { transactionId: order.payment.transactionId },
+                order.payment.dek
+            )
+            decryptedOrder.payment = {
+                ...order.payment,
+                transactionId: decryptedPayment.transactionId
+            }
+        }
+
+        return decryptedOrder
+    }
+
     static async createOrder(data: {
         userId: string
         items: any[]
@@ -63,7 +103,8 @@ class OrderService {
         const discountPercent = 0 // Default no discount
         const total = baseTotal + shippingFee
 
-        // Tạo order với full address object
+        // Tạo order với địa chỉ - COPY TRỰC TIẾP từ user (đã được mã hóa sẵn)
+        // Không mã hóa lại vì userAddress đã được encrypt với DEK của user
         const newOrder = await Order.create({
             userId: new Types.ObjectId(userId),
             items: orderItems,
@@ -73,13 +114,14 @@ class OrderService {
             baseTotal,
             currency: 'VND',
             shippingAddress: {
-                name: userAddress.name,
-                phone: userAddress.phone,
-                addressLine: userAddress.addressLine,
+                name: userAddress.name, // Đã encrypted sẵn
+                phone: userAddress.phone, // Đã encrypted sẵn
+                addressLine: userAddress.addressLine, // Đã encrypted sẵn
                 city: userAddress.city,
                 ward: userAddress.ward,
                 isDefault: userAddress.isDefault,
-                location: userAddress.location
+                location: userAddress.location,
+                dek: userAddress.dek // Dùng DEK của user
             },
             status: 'PROCESSING',
             payment: {
@@ -96,11 +138,6 @@ class OrderService {
 
         // Xóa các cart items đã được đặt hàng
         const productIds = items.map((item) => new Types.ObjectId(item.productId))
-        console.log('🚀 ~ OrderService ~ createOrder ~ Deleting cart items:', {
-            userId,
-            productIds: productIds.map((id) => id.toString()),
-            itemsCount: items.length
-        })
 
         // Xóa các items từ cart (Cart có structure: { userId, items: [{ productId, quantity }] })
         await Cart.updateOne(
@@ -127,8 +164,11 @@ class OrderService {
 
         const total = await Order.countDocuments(filter)
 
+        // Giải mã các trường nhạy cảm cho mỗi order
+        const decryptedOrders = await Promise.all(orders.map((order) => this.decryptOrderData(order.toObject())))
+
         return {
-            data: orders,
+            data: decryptedOrders,
             pagination: {
                 page,
                 limit,
@@ -153,8 +193,11 @@ class OrderService {
 
         const total = await Order.countDocuments(filter)
 
+        // Giải mã các trường nhạy cảm cho mỗi order
+        const decryptedOrders = await Promise.all(orders.map((order) => this.decryptOrderData(order.toObject())))
+
         return {
-            data: orders,
+            data: decryptedOrders,
             pagination: {
                 page,
                 limit,
@@ -173,7 +216,7 @@ class OrderService {
             throw new NotFoundError('Không tìm thấy đơn hàng')
         }
 
-        return order.toObject()
+        return await this.decryptOrderData(order.toObject())
     }
 
     // Admin: Lấy tất cả đơn hàng
@@ -198,8 +241,11 @@ class OrderService {
 
         const total = await Order.countDocuments(filter)
 
+        // Giải mã các trường nhạy cảm cho mỗi order
+        const decryptedOrders = await Promise.all(orders.map((order) => this.decryptOrderData(order.toObject())))
+
         return {
-            data: orders,
+            data: decryptedOrders,
             pagination: {
                 page,
                 limit,
@@ -278,8 +324,14 @@ class OrderService {
 
         // Update payment status
         order.payment.status = paymentStatus
+
+        // Mã hóa transactionId nếu có
         if (transactionId) {
-            order.payment.transactionId = transactionId
+            const { encryptedData, encryptedKey } = await KeyManagementApiService.encryptDataByApi({
+                transactionId
+            })
+            order.payment.transactionId = encryptedData.transactionId
+            order.payment.dek = encryptedKey
         }
 
         // Nếu payment thành công, update order status thành PAID
@@ -291,7 +343,8 @@ class OrderService {
 
         await order.save()
 
-        return order.toObject()
+        // Giải mã và trả về
+        return await this.decryptOrderData(order.toObject())
     }
 
     static async cancelOrder(orderId: string, cancelReason?: string) {
