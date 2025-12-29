@@ -7,10 +7,11 @@ import { useAuth } from '@/hooks/use-auth'
 import { showNotification } from '@/lib/utils'
 import { isValidEmail, isValidOTP, isEmpty, isValidVNIPhoneNumber } from '@/lib/validator'
 import AuthService from '@/services/auth.service'
+import { configureGoogleSignIn, signInWithGoogle } from '@/services/google-auth.service'
 import { Stack, useRouter } from 'expo-router'
-import { ArrowLeftIcon, EyeIcon, EyeOffIcon, MailIcon, ShieldCheckIcon, UserPlusIcon } from 'lucide-react-native'
-import { useState } from 'react'
-import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
+import { EyeIcon, EyeOffIcon, MailIcon, ShieldCheckIcon, UserPlusIcon } from 'lucide-react-native'
+import { useEffect, useState } from 'react'
+import { View, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native'
 
 type RegistrationStep = 'email' | 'otp' | 'password'
 
@@ -29,6 +30,7 @@ const registerAccountScreen: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [googleLoading, setGoogleLoading] = useState(false)
     const [accessTokenVerify, setAccessTokenVerify] = useState('')
 
     // Validation errors
@@ -40,6 +42,61 @@ const registerAccountScreen: React.FC = () => {
     const [confirmPasswordError, setConfirmPasswordError] = useState('')
 
     // Step 1: Email input and send OTP
+    useEffect(() => {
+        configureGoogleSignIn()
+    }, [])
+
+    const handleGoogleSignIn = async () => {
+        setGoogleLoading(true)
+        try {
+            const result = await signInWithGoogle()
+
+            if (!result.success || !result.user) {
+                if (!result.cancelled) {
+                    showNotification('error', result.error || 'Đăng nhập Google thất bại')
+                }
+                return
+            }
+
+            const { id: googleId, email: googleEmail, name: googleName } = result.user
+
+            const checkRes = await AuthService.checkGoogleAccount(googleId, googleEmail)
+
+            if (checkRes.code !== 200) {
+                showNotification('error', checkRes.message || 'Không thể kiểm tra tài khoản')
+                return
+            }
+
+            if (checkRes.data.exists) {
+                const loginRes = await AuthService.loginWithGoogle(googleId, googleEmail)
+
+                if (loginRes.code === 200) {
+                    showNotification('success', 'Đăng nhập thành công')
+                    await login(loginRes.data.accessToken, loginRes.data.refreshToken, {
+                        name: loginRes.data.name,
+                        role: loginRes.data.role
+                    })
+                    router.replace('/')
+                } else {
+                    showNotification('error', loginRes.message || 'Đăng nhập thất bại')
+                }
+            } else {
+                router.push({
+                    pathname: '/(auth)/(register)/register-with-google',
+                    params: {
+                        googleId,
+                        email: googleEmail,
+                        name: googleName || ''
+                    }
+                } as any)
+            }
+        } catch (error: any) {
+            showNotification('error', error.message || 'Đã xảy ra lỗi')
+        } finally {
+            setGoogleLoading(false)
+        }
+    }
+
     const handleSendOTP = async () => {
         setEmailError('')
 
@@ -166,36 +223,11 @@ const registerAccountScreen: React.FC = () => {
         }
     }
 
-    const handleBack = () => {
-        if (step === 'otp') {
-            setStep('email')
-            setOtp('')
-            setOtpError('')
-        } else if (step === 'password') {
-            setStep('otp')
-            setName('')
-            setPhone('')
-            setPassword('')
-            setConfirmPassword('')
-            setNameError('')
-            setPhoneError('')
-            setPasswordError('')
-            setConfirmPasswordError('')
-        } else {
-            router.back()
-        }
-    }
-
     return (
         <>
             <Stack.Screen
                 options={{
-                    title: 'Đăng ký',
-                    headerLeft: () => (
-                        <Button variant='ghost' size='icon' onPress={handleBack} className='mr-2'>
-                            <Icon as={ArrowLeftIcon} />
-                        </Button>
-                    )
+                    title: 'Đăng ký'
                 }}
             />
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className='flex-1'>
@@ -230,12 +262,12 @@ const registerAccountScreen: React.FC = () => {
                                         keyboardType='email-address'
                                         autoCapitalize='none'
                                         autoCorrect={false}
-                                        editable={!loading}
+                                        editable={!loading && !googleLoading}
                                     />
                                     {emailError && <Text className='text-sm text-destructive'>{emailError}</Text>}
                                 </View>
 
-                                <Button onPress={handleSendOTP} disabled={loading}>
+                                <Button onPress={handleSendOTP} disabled={loading || googleLoading}>
                                     <Text>{loading ? 'Đang gửi...' : 'Gửi mã OTP'}</Text>
                                     <Icon as={MailIcon} />
                                 </Button>
@@ -243,14 +275,28 @@ const registerAccountScreen: React.FC = () => {
                                 <View className='relative items-center'>
                                     <View className='absolute left-0 right-0 top-1/2 h-px bg-border' />
                                     <Text className='relative bg-background px-4 text-sm text-muted-foreground'>
-                                        Hoặc
+                                        Hoặc tiếp tục với
                                     </Text>
                                 </View>
+
+                                {/* Google Sign-In Button */}
+                                <Button
+                                    variant='outline'
+                                    className='w-full flex-row items-center gap-3'
+                                    onPress={handleGoogleSignIn}
+                                    disabled={loading || googleLoading}
+                                >
+                                    <Image
+                                        source={{ uri: 'https://www.google.com/favicon.ico' }}
+                                        style={{ width: 20, height: 20 }}
+                                    />
+                                    <Text>{googleLoading ? 'Đang xử lý...' : 'Tiếp tục với Google'}</Text>
+                                </Button>
 
                                 <Button
                                     variant='outline'
                                     onPress={() => router.push('/(auth)/(register)/register-by-phone')}
-                                    disabled={loading}
+                                    disabled={loading || googleLoading}
                                 >
                                     <Text>Đăng ký bằng số điện thoại</Text>
                                 </Button>

@@ -11,6 +11,7 @@
         "format": "prettier --write \"**/*.{js,ts,jsx,tsx,json,css,md}\" --ignore-path .prettierignore"
     },
     "dependencies": {
+        "@react-native-google-signin/google-signin": "^16.1.1",
         "@react-navigation/native": "^7.0.0",
         "@rn-primitives/alert-dialog": "^1.2.0",
         "@rn-primitives/avatar": "^1.2.0",
@@ -30,7 +31,6 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "expo": "^54.0.0",
-        "expo-auth-session": "~7.0.10",
         "expo-clipboard": "^8.0.7",
         "expo-crypto": "~15.0.8",
         "expo-file-system": "~18.0.8",

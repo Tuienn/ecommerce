@@ -4,7 +4,11 @@ export const AUTH = {
     USER_NOT_FOUND: 'Không tìm thấy người dùng',
     ACCOUNT_DISABLED: 'Tài khoản đã bị vô hiệu hoá',
     OTP_EXPIRED: 'Token OTP không hợp lệ hoặc đã hết hạn',
-    INVALID_ACCOUNT: 'Tài khoản hoặc mật khẩu không đúng'
+    INVALID_ACCOUNT: 'Tài khoản hoặc mật khẩu không đúng',
+    // Google Auth
+    GOOGLE_ACCOUNT_NOT_FOUND: 'Tài khoản Google chưa được đăng ký',
+    GOOGLE_ID_REQUIRED: 'Thiếu Google ID',
+    GOOGLE_EMAIL_REQUIRED: 'Thiếu email từ Google'
 }
 
 export const CART = {

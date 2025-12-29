@@ -67,6 +67,29 @@ class AuthSerice {
     static async getVerifyStatus(phone: string) {
         return apiService(`/auth/otp/verify-status/${phone}`)
     }
+
+    // ========== Google Auth Methods ==========
+
+    static async checkGoogleAccount(googleId: string, email: string) {
+        return apiService('/auth/google/check', {
+            method: 'POST',
+            body: JSON.stringify({ googleId, email })
+        })
+    }
+
+    static async registerWithGoogle(data: { googleId: string; email: string; name: string; phone: string }) {
+        return apiService('/auth/google/register', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        })
+    }
+
+    static async loginWithGoogle(googleId: string, email: string) {
+        return apiService('/auth/google/login', {
+            method: 'POST',
+            body: JSON.stringify({ googleId, email })
+        })
+    }
 }
 
 export default AuthSerice

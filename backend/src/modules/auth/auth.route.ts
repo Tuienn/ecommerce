@@ -11,4 +11,9 @@ router.post('/logout', asyncHandler(AuthController.logout))
 router.post('/register', asyncHandler(AuthController.registerUser))
 router.get('', authenticateToken, asyncHandler(AuthController.getCurrentUser))
 
+// Google Auth Routes
+router.post('/google/check', asyncHandler(AuthController.checkGoogleAccount))
+router.post('/google/register', asyncHandler(AuthController.registerWithGoogle))
+router.post('/google/login', asyncHandler(AuthController.loginWithGoogle))
+
 export default router
