@@ -19,6 +19,7 @@ export interface IPayment {
     amount: number
     status: PaymentStatus
     transactionId?: string
+    dek?: string
     createdAt?: Date
     updatedAt?: Date
 }

@@ -1,14 +1,45 @@
 import { existedDataField } from './../../constants/text'
 import { User } from '../index.model'
 import { ConflictRequestError, NotFoundError } from '../../exceptions/error.handler'
-import { IUser } from '../../types/user'
+import { IAddress, IUser } from '../../types/user'
 import { RootFilterQuery } from 'mongoose'
 import { AUTH } from '../../constants/text'
 import { hashPassword } from '../../utils/crypto'
+import KeyManagementApiService from '../../httpClients/keyManagement/keyManagement.service'
 
 const { DEFAULT_EMAIL_ADMIN, DEFAULT_PASSWORD_ADMIN } = process.env
 
 class UserService {
+    /**
+     * Helper function để giải mã các trường nhạy cảm trong address
+     */
+    private static async decryptAddressData(address: IAddress): Promise<any> {
+        if (!address?.dek) {
+            // Nếu không có DEK (địa chỉ cũ chưa được mã hóa), trả về nguyên bản
+            return address
+        }
+
+        const decryptedData = await KeyManagementApiService.decryptDataByApi(
+            {
+                name: address.name,
+                phone: address.phone,
+                addressLine: address.addressLine
+            },
+            address.dek
+        )
+
+        return {
+            _id: address._id,
+            city: address.city,
+            ward: address.ward,
+            isDefault: address.isDefault,
+            location: address.location,
+            name: decryptedData.name,
+            phone: decryptedData.phone,
+            addressLine: decryptedData.addressLine
+        }
+    }
+
     static async createDefaultAdmin() {
         const existingAdmin = await User.findOne({ email: DEFAULT_EMAIL_ADMIN })
 
@@ -18,7 +49,7 @@ class UserService {
                 email: DEFAULT_EMAIL_ADMIN,
                 password: DEFAULT_PASSWORD_ADMIN,
                 role: 'admin',
-                phone: '0942029135'
+                phone: '0942029130'
             })
 
             console.log('Default admin user created successfully')
@@ -179,6 +210,10 @@ class UserService {
 
         const { name, phone, addressLine, city, ward, location, isDefault: requestedDefault } = addressData
 
+        // Mã hóa các trường nhạy cảm
+        const sensitiveData = { name, phone, addressLine }
+        const { encryptedData, encryptedKey } = await KeyManagementApiService.encryptDataByApi(sensitiveData)
+
         // Xác định isDefault
         let isDefault: boolean
         if (requestedDefault === true) {
@@ -200,22 +235,35 @@ class UserService {
         }
 
         const newAddress = {
-            name,
-            phone,
-            addressLine,
+            name: encryptedData.name,
+            phone: encryptedData.phone,
+            addressLine: encryptedData.addressLine,
             city,
             ward,
             isDefault,
             location: {
                 type: 'Point' as const,
                 coordinates: location?.coordinates || [0, 0]
-            }
+            },
+            dek: encryptedKey
         }
 
         user.addresses.push(newAddress)
         await user.save()
 
-        return user.addresses[user.addresses.length - 1]
+        // Trả về địa chỉ đã được giải mã (plain text)
+        const savedAddress = user.addresses[user.addresses.length - 1]
+        return {
+            _id: savedAddress._id,
+            city: savedAddress.city,
+            ward: savedAddress.ward,
+            isDefault: savedAddress.isDefault,
+            location: savedAddress.location,
+            dek: savedAddress.dek,
+            name,
+            phone,
+            addressLine
+        }
     }
 
     /**
@@ -244,7 +292,8 @@ class UserService {
 
         await user.save()
 
-        return user.addresses[addressIndex]
+        // Giải mã và trả về địa chỉ
+        return await this.decryptAddressData(user.addresses[addressIndex])
     }
 
     /**
@@ -264,11 +313,48 @@ class UserService {
         }
 
         const { name, phone, addressLine, city, ward, location, isDefault: requestedDefault } = addressData
+        const currentAddress = user.addresses[addressIndex]
 
-        // Cập nhật thông tin địa chỉ
-        if (name !== undefined) user.addresses[addressIndex].name = name
-        if (phone !== undefined) user.addresses[addressIndex].phone = phone
-        if (addressLine !== undefined) user.addresses[addressIndex].addressLine = addressLine
+        // Kiểm tra xem có trường nhạy cảm nào được cập nhật không
+        const hasSensitiveUpdate = name !== undefined || phone !== undefined || addressLine !== undefined
+
+        // Khai báo biến để lưu các giá trị plain text
+        let plainName: string | undefined
+        let plainPhone: string | undefined
+        let plainAddressLine: string | undefined
+
+        if (hasSensitiveUpdate) {
+            // Giải mã các giá trị hiện tại để lấy plain text
+            const currentDek = currentAddress.dek
+            let currentPlainData = { name: '', phone: '', addressLine: '' }
+
+            if (currentDek) {
+                currentPlainData = await KeyManagementApiService.decryptDataByApi(
+                    {
+                        name: currentAddress.name,
+                        phone: currentAddress.phone,
+                        addressLine: currentAddress.addressLine
+                    },
+                    currentDek
+                )
+            }
+
+            // Merge: sử dụng giá trị mới nếu có, không thì giữ giá trị cũ đã giải mã
+            plainName = name !== undefined ? name : currentPlainData.name
+            plainPhone = phone !== undefined ? phone : currentPlainData.phone
+            plainAddressLine = addressLine !== undefined ? addressLine : currentPlainData.addressLine
+
+            // Mã hóa lại với DEK mới
+            const sensitiveData = { name: plainName, phone: plainPhone, addressLine: plainAddressLine }
+            const { encryptedData, encryptedKey } = await KeyManagementApiService.encryptDataByApi(sensitiveData)
+
+            user.addresses[addressIndex].name = encryptedData.name
+            user.addresses[addressIndex].phone = encryptedData.phone
+            user.addresses[addressIndex].addressLine = encryptedData.addressLine
+            user.addresses[addressIndex].dek = encryptedKey
+        }
+
+        // Cập nhật các trường không nhạy cảm
         if (city !== undefined) user.addresses[addressIndex].city = city
         if (ward !== undefined) user.addresses[addressIndex].ward = ward
         if (location?.coordinates) {
@@ -296,7 +382,23 @@ class UserService {
 
         await user.save()
 
-        return user.addresses[addressIndex]
+        // Trả về địa chỉ đã được giải mã
+        const updatedAddress = user.addresses[addressIndex]
+        if (hasSensitiveUpdate) {
+            return {
+                _id: updatedAddress._id,
+                city: updatedAddress.city,
+                ward: updatedAddress.ward,
+                isDefault: updatedAddress.isDefault,
+                location: updatedAddress.location,
+                name: plainName,
+                phone: plainPhone,
+                addressLine: plainAddressLine
+            }
+        }
+
+        // Nếu không cập nhật trường nhạy cảm, giải mã và trả về
+        return await this.decryptAddressData(updatedAddress)
     }
 
     /**
@@ -308,7 +410,10 @@ class UserService {
             throw new NotFoundError(AUTH.USER_NOT_FOUND)
         }
 
-        return user.addresses
+        // Giải mã các trường nhạy cảm cho mỗi địa chỉ
+        const decryptedAddresses = await Promise.all(user.addresses.map((address) => this.decryptAddressData(address)))
+
+        return decryptedAddresses
     }
 
     /**

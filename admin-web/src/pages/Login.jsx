@@ -25,7 +25,6 @@ const Login = () => {
     const mutationLogin = useMutation({
         mutationFn: (data) => AuthService.login(data),
         onSuccess: (data) => {
-            console.log('🚀 ~ Login ~ data:', data)
             saveAccessToken(data.data.accessToken)
             saveAuthToken(data.data.refreshToken, {
                 role: data.data.role,

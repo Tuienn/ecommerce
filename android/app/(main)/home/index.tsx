@@ -83,7 +83,6 @@ const HomeScreen = () => {
                 params.page,
                 params.limit
             )
-            console.log('🚀 ~ fetchProducts ~ response:', response)
 
             if (response.code === 200) {
                 const newProducts = response.data.data || []

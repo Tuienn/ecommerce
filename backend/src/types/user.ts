@@ -20,6 +20,7 @@ export interface IAddress {
         type: 'Point'
         coordinates: [number, number] // [longitude, latitude]
     }
+    dek: string
 }
 
 /**
