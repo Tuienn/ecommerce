@@ -14,6 +14,7 @@ export default function AuthLayout() {
             <Stack.Screen name='(login)/login-by-email' />
             <Stack.Screen name='(register)/register-by-email' />
             <Stack.Screen name='(register)/register-by-phone' options={{ headerShown: false }} />
+            <Stack.Screen name='google-test' options={{ headerShown: true, title: 'Test Google Sign-In' }} />
         </Stack>
     )
 }

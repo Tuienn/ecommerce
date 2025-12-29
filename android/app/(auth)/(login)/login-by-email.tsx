@@ -7,10 +7,11 @@ import { useAuth } from '@/hooks/use-auth'
 import { showNotification } from '@/lib/utils'
 import { isValidEmail, isEmpty } from '@/lib/validator'
 import AuthService from '@/services/auth.service'
+import { configureGoogleSignIn, signInWithGoogle } from '@/services/google-auth.service'
 import { Link, Stack, useRouter } from 'expo-router'
 import { EyeIcon, EyeOffIcon, LogInIcon, MailIcon } from 'lucide-react-native'
-import { useState } from 'react'
-import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
+import { useEffect, useState } from 'react'
+import { View, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native'
 
 const LoginByEmailScreen: React.FC = () => {
     const router = useRouter()
@@ -21,10 +22,15 @@ const LoginByEmailScreen: React.FC = () => {
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [googleLoading, setGoogleLoading] = useState(false)
 
     // Validation errors
     const [emailError, setEmailError] = useState('')
     const [passwordError, setPasswordError] = useState('')
+
+    useEffect(() => {
+        configureGoogleSignIn()
+    }, [])
 
     const handleLogin = async () => {
         setEmailError('')
@@ -72,6 +78,61 @@ const LoginByEmailScreen: React.FC = () => {
         }
     }
 
+    const handleGoogleSignIn = async () => {
+        setGoogleLoading(true)
+        try {
+            // Step 1: Google Sign-In
+            const result = await signInWithGoogle()
+
+            if (!result.success || !result.user) {
+                if (!result.cancelled) {
+                    showNotification('error', result.error || 'Đăng nhập Google thất bại')
+                }
+                return
+            }
+
+            const { id: googleId, email: googleEmail, name: googleName } = result.user
+
+            // Step 2: Check if account exists
+            const checkRes = await AuthService.checkGoogleAccount(googleId, googleEmail)
+
+            if (checkRes.code !== 200) {
+                showNotification('error', checkRes.message || 'Không thể kiểm tra tài khoản')
+                return
+            }
+
+            if (checkRes.data.exists) {
+                // Account exists -> Login
+                const loginRes = await AuthService.loginWithGoogle(googleId, googleEmail)
+
+                if (loginRes.code === 200) {
+                    showNotification('success', 'Đăng nhập thành công')
+                    await login(loginRes.data.accessToken, loginRes.data.refreshToken, {
+                        name: loginRes.data.name,
+                        role: loginRes.data.role
+                    })
+                    router.replace('/')
+                } else {
+                    showNotification('error', loginRes.message || 'Đăng nhập thất bại')
+                }
+            } else {
+                // Account doesn't exist -> Redirect to register
+                router.push({
+                    pathname: '/(auth)/(register)/register-with-google',
+                    params: {
+                        googleId,
+                        email: googleEmail,
+                        name: googleName || ''
+                    }
+                } as any)
+            }
+        } catch (error: any) {
+            showNotification('error', error.message || 'Đã xảy ra lỗi')
+        } finally {
+            setGoogleLoading(false)
+        }
+    }
+
     return (
         <>
             <Stack.Screen
@@ -116,7 +177,7 @@ const LoginByEmailScreen: React.FC = () => {
                                         keyboardType='email-address'
                                         autoCapitalize='none'
                                         autoCorrect={false}
-                                        editable={!loading}
+                                        editable={!loading && !googleLoading}
                                     />
                                     <View className='absolute right-0 top-0 h-full justify-center pr-3'>
                                         <Icon as={MailIcon} className='h-5 w-5 text-muted-foreground' />
@@ -138,7 +199,7 @@ const LoginByEmailScreen: React.FC = () => {
                                         }}
                                         secureTextEntry={!showPassword}
                                         autoCapitalize='none'
-                                        editable={!loading}
+                                        editable={!loading && !googleLoading}
                                     />
                                     <View className='absolute right-0 top-0 h-full justify-center pr-3'>
                                         <Button
@@ -158,7 +219,7 @@ const LoginByEmailScreen: React.FC = () => {
                             </View>
 
                             {/* Login Button */}
-                            <Button onPress={handleLogin} disabled={loading} className='mt-2'>
+                            <Button onPress={handleLogin} disabled={loading || googleLoading} className='mt-2'>
                                 <Text>{loading ? 'Đang đăng nhập...' : 'Đăng nhập'}</Text>
                                 <Icon as={LogInIcon} />
                             </Button>
@@ -170,6 +231,20 @@ const LoginByEmailScreen: React.FC = () => {
                             <Text className='text-sm text-muted-foreground'>HOẶC</Text>
                             <View className='h-px flex-1 bg-border' />
                         </View>
+
+                        {/* Google Sign-In Button */}
+                        <Button
+                            variant='outline'
+                            className='w-full flex-row items-center gap-3'
+                            onPress={handleGoogleSignIn}
+                            disabled={loading || googleLoading}
+                        >
+                            <Image
+                                source={{ uri: 'https://www.google.com/favicon.ico' }}
+                                style={{ width: 20, height: 20 }}
+                            />
+                            <Text>{googleLoading ? 'Đang xử lý...' : 'Tiếp tục với Google'}</Text>
+                        </Button>
 
                         {/* Register Link */}
                         <View className='flex-row items-center justify-center gap-2'>

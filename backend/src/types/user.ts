@@ -29,8 +29,9 @@ export interface IUser extends Document {
     _id: Types.ObjectId
     name: string
     email: string
-    password: string
-    phone?: string
+    password?: string // Optional for Google Sign-In users
+    phone: string
+    googleId?: string // Google OAuth ID
     role: UserRole
     isActive: boolean
     addresses: IAddress[]

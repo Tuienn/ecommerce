@@ -96,6 +96,74 @@ class AuthController {
             return
         }
     }
+
+    // ========== Google Auth Methods ==========
+
+    static async checkGoogleAccount(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { googleId, email } = req.body
+
+            if (!googleId) {
+                throw new BadRequestError(missingDataField('googleId'))
+            }
+            if (!email) {
+                throw new BadRequestError(missingDataField('email'))
+            }
+
+            const result = await AuthService.checkGoogleAccount(googleId, email)
+            return handleSuccess(res, result, 'Kiểm tra tài khoản Google thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
+    static async registerWithGoogle(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { googleId, email, name, phone } = req.body
+
+            if (!googleId) {
+                throw new BadRequestError(missingDataField('googleId'))
+            }
+            if (!email) {
+                throw new BadRequestError(missingDataField('email'))
+            }
+            if (!name) {
+                throw new BadRequestError(missingDataField('tên'))
+            }
+            if (!phone) {
+                throw new BadRequestError(missingDataField('số điện thoại'))
+            }
+
+            if (!isValidEmail(email)) throw new BadRequestError(invalidDataField('email'))
+            if (!isValidPhoneNumber(phone)) throw new BadRequestError(invalidDataField('số điện thoại'))
+
+            const data = await AuthService.registerWithGoogle({ googleId, email, name, phone })
+            return handleSuccess(res, data, 'Đăng ký với Google thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
+
+    static async loginWithGoogle(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { googleId, email } = req.body
+
+            if (!googleId) {
+                throw new BadRequestError(missingDataField('googleId'))
+            }
+            if (!email) {
+                throw new BadRequestError(missingDataField('email'))
+            }
+
+            const data = await AuthService.loginWithGoogle(googleId, email)
+            return handleSuccess(res, data, 'Đăng nhập với Google thành công')
+        } catch (error) {
+            next(error)
+            return
+        }
+    }
 }
 
 export default AuthController

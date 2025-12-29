@@ -78,9 +78,15 @@ const userSchema = new Schema<IUser>(
 
         password: {
             type: String,
-            required: true,
+            required: false, // Optional for Google Sign-In users
             minlength: 6,
             select: false // không trả về password khi query
+        },
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true, // Cho phép null/undefined, chỉ unique khi có giá trị
+            index: true
         },
         role: {
             type: String,
@@ -104,10 +110,11 @@ const userSchema = new Schema<IUser>(
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next()
+    // Skip hashing if password is not modified or doesn't exist (Google users)
+    if (!this.isModified('password') || !this.password) return next()
 
     try {
-        this.password = await hashPassword(this.password)
+        this.password = await hashPassword(this.password!)
         next()
     } catch (error) {
         next(error as Error)

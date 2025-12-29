@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/conversationListFragment">
+
+    <fragment
+        android:id="@+id/conversationListFragment"
+        android:name="com.example.smsheadless.ui.conversationlist.ConversationListFragment"
+        android:label="@string/conversation_list_title">
+        <action
+            android:id="@+id/action_conversationListFragment_to_conversationDetailFragment"
+            app:destination="@id/conversationDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/conversationDetailFragment"
+        android:name="com.example.smsheadless.ui.conversationdetail.ConversationDetailFragment"
+        android:label="@string/conversation_detail_label">
+        <argument
+            android:name="phone"
+            app:argType="string" />
+    </fragment>
+</navigation>
+

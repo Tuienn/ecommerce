@@ -9,7 +9,6 @@ import { useRouter } from 'expo-router'
 import { ArrowLeft, Phone, Mail, Lock, User, Copy, CheckCircle2 } from 'lucide-react-native'
 import AuthService from '@/services/auth.service'
 import { showNotification } from '@/lib/utils'
-import { saveAccessToken, saveRefreshToken } from '@/lib/secure-store'
 import * as Clipboard from 'expo-clipboard'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -25,8 +24,8 @@ export default function RegisterByPhoneScreen() {
     // Verify step (polling)
     const [polling, setPolling] = useState(false)
     const [timeLeft, setTimeLeft] = useState(120) // 2 minutes
-    const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
-    const timerIntervalRef = useRef<NodeJS.Timeout | null>(null)
+    const pollingIntervalRef = useRef<any>(null)
+    const timerIntervalRef = useRef<any>(null)
     const { login } = useAuth()
     // Register step
     const [accessToken, setAccessToken] = useState('')

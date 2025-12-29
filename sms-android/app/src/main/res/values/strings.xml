@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">SmsHeadLess</string>
+    <string name="conversation_list_title">Cuộc hội thoại</string>
+    <string name="reload_conversations">Reload danh sách</string>
+    <string name="no_conversations">Chưa có cuộc hội thoại</string>
+    <string name="conversation_detail_label">Chi tiết cuộc hội thoại</string>
+    <string name="conversation_detail_title">%1$s</string>
+    <string name="reload_conversation">Reload cuộc hội thoại</string>
+    <string name="no_messages">Chưa có tin nhắn</string>
+    <string name="status_pending">pending</string>
+    <string name="permission_denied">Cần cấp quyền SMS để hoạt động</string>
+    <string name="default_sms_required">Hãy đặt ứng dụng này làm SMS mặc định để tiếp tục</string>
+    <string name="default_sms_success">Đã đặt làm app SMS mặc định</string>
+</resources>

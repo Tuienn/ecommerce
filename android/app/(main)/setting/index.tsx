@@ -9,7 +9,6 @@ import AddressFormDialog from '@/components/app/setting/address-form-dialog'
 import UserService from '@/services/user.service'
 import { IAddress } from '@/types/user'
 import { showNotification } from '@/lib/utils'
-import { clearAuthToken, getRefreshToken } from '@/lib/secure-store'
 import { Plus, LogOut, LogIn, UserPlus } from 'lucide-react-native'
 import { useRouter } from 'expo-router'
 import AuthSerice from '@/services/auth.service'
@@ -26,7 +25,7 @@ interface UserProfile {
 
 export default function SettingScreen() {
     const router = useRouter()
-    const { isAuth } = useAuth()
+    const { isAuth, logout } = useAuth()
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [addresses, setAddresses] = useState<IAddress[]>([])
     const [loading, setLoading] = useState(true)
@@ -123,23 +122,6 @@ export default function SettingScreen() {
         }
     }
 
-    const handleLogout = async () => {
-        try {
-            const refreshToken = await getRefreshToken()
-            if (!refreshToken) {
-                await clearAuthToken()
-                return
-            }
-            await clearAuthToken()
-            await AuthSerice.logout(refreshToken)
-            showNotification('success', 'Đăng xuất thành công')
-            router.replace('/(auth)/(login)/login-by-email')
-        } catch (error) {
-            console.error('Error logging out:', error)
-            showNotification('error', 'Không thể đăng xuất')
-        }
-    }
-
     // Guest mode UI
     if (!isAuth) {
         return (
@@ -210,10 +192,7 @@ export default function SettingScreen() {
             <View className='border-b border-gray-200 bg-white px-4 py-4'>
                 <View className='flex-row items-center justify-between'>
                     <Text className='text-xl font-bold text-gray-900'>Cài đặt</Text>
-                    <Button
-                        onPress={handleLogout}
-                        className='flex-row items-center gap-2 rounded-lg bg-red-50 px-3 py-2'
-                    >
+                    <Button onPress={logout} className='flex-row items-center gap-2 rounded-lg bg-red-50 px-3 py-2'>
                         <LogOut size={18} color='#dc2626' />
                         <Text className='text-sm font-medium text-red-600'>Đăng xuất</Text>
                     </Button>

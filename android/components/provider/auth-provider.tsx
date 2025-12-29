@@ -1,5 +1,6 @@
 import { clearAuthToken, getAccessToken, getRefreshToken, saveAccessToken, saveRefreshToken } from '@/lib/secure-store'
 import AuthSerice from '@/services/auth.service'
+import { signOutFromGoogle } from '@/services/google-auth.service'
 import { IUser } from '@/types/auth'
 import React, { createContext, ReactNode, useState, useEffect } from 'react'
 
@@ -98,18 +99,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const logout = async () => {
         try {
             const refreshToken = await getRefreshToken()
-            if (!refreshToken) {
-                return
+            if (refreshToken) {
+                // Try to logout from server, but don't block on failure
+                try {
+                    await AuthSerice.logout(refreshToken)
+                } catch (serverError) {
+                    console.log('Server logout failed, clearing local auth anyway:', serverError)
+                }
             }
-            const res = await AuthSerice.logout(refreshToken)
-
-            await clearAuthToken()
-            setUser(null)
-
-            return res
         } catch (error: any) {
             console.error('Error during logout:', error)
-            throw error
+        } finally {
+            // Always clear local auth state
+            await clearAuthToken()
+            setUser(null)
+            // Also sign out from Google to allow choosing different account next time
+            await signOutFromGoogle()
         }
     }
 
