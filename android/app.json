@@ -23,7 +23,8 @@
                 "foregroundImage": "./assets/images/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
             },
-            "package": "com.tuienn.ecommerce"
+            "package": "com.tuienn.ecommerce",
+            "enableProguardInReleaseBuilds": true
         },
         "web": {
             "bundler": "metro",
