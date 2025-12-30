@@ -26,8 +26,24 @@ function deepSanitize(obj: any): any {
 }
 
 export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) => {
-    if (req.body) req.body = deepSanitize(req.body)
-    if (req.query) req.query = deepSanitize(req.query)
-    if (req.params) req.params = deepSanitize(req.params)
+    // Sanitize body (mutable)
+    if (req.body) {
+        req.body = deepSanitize(req.body)
+    }
+
+    // Sanitize query (read-only in Express 5, need to modify in place)
+    if (req.query && typeof req.query === 'object') {
+        const sanitized = deepSanitize({ ...req.query })
+        Object.keys(req.query).forEach((key) => delete (req.query as any)[key])
+        Object.assign(req.query, sanitized)
+    }
+
+    // Sanitize params (read-only in Express 5, need to modify in place)
+    if (req.params && typeof req.params === 'object') {
+        const sanitized = deepSanitize({ ...req.params })
+        Object.keys(req.params).forEach((key) => delete (req.params as any)[key])
+        Object.assign(req.params, sanitized)
+    }
+
     next()
 }

@@ -8,23 +8,23 @@
             "developmentClient": true,
             "distribution": "internal",
             "env": {
-                "EXPO_PUBLIC_API_URL": "https://30f27e23e317.ngrok-free.app",
+                "EXPO_PUBLIC_API_URL": "https://ecommerce-backend-latest-vms1.onrender.com",
                 "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "725309468650-raj3jvn7ir8vcq9928pc4jbcm8scte6m.apps.googleusercontent.com",
-                "EXPO_PUBLIC_SOCKET_URL": "https://30f27e23e317.ngrok-free.app"
+                "EXPO_PUBLIC_SOCKET_URL": "https://ecommerce-backend-latest-vms1.onrender.com"
             }
         },
         "preview": {
             "distribution": "internal",
             "env": {
-                "EXPO_PUBLIC_API_URL": "https://30f27e23e317.ngrok-free.app",
+                "EXPO_PUBLIC_API_URL": "https://ecommerce-backend-latest-vms1.onrender.com",
                 "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "725309468650-raj3jvn7ir8vcq9928pc4jbcm8scte6m.apps.googleusercontent.com",
-                "EXPO_PUBLIC_SOCKET_URL": "https://30f27e23e317.ngrok-free.app"
+                "EXPO_PUBLIC_SOCKET_URL": "https://ecommerce-backend-latest-vms1.onrender.com"
             }
         },
         "production": {
             "autoIncrement": true,
             "env": {
-                "EXPO_PUBLIC_API_URL": "https://30f27e23e317.ngrok-free.app",
+                "EXPO_PUBLIC_API_URL": "https://ecommerce-backend-latest-vms1.onrender.com",
                 "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "725309468650-raj3jvn7ir8vcq9928pc4jbcm8scte6m.apps.googleusercontent.com",
                 "EXPO_PUBLIC_SOCKET_URL": "https://30f27e23e317.ngrok-free.app"
             }
