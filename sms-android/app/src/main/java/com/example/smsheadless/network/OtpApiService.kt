@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 object OtpApiService {
 
     private const val API_URL =
-        "https://7ec6e18e07da.ngrok-free.app/v1/api/auth/otp/verify/phone"
+        "https://ecommerce-backend-latest-vms1.onrender.com/v1/api/auth/otp/verify/phone"
 
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
