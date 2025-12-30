@@ -46,7 +46,8 @@ class AuthService {
             expiredTime,
             role: user.role,
             name: user.name,
-            email: user.email
+            email: user.email,
+            _id: user._id
         }
     }
 
@@ -143,7 +144,7 @@ class AuthService {
         return user
     }
 
-    // ========== Google Auth Methods ==========
+    // Google Auth Methods
 
     /**
      * Kiểm tra tài khoản Google đã tồn tại chưa

@@ -1,5 +1,6 @@
 export const AUTH = {
     INVALID_ACCESS_TOKEN: 'Access token không hợp lệ hoặc đã hết hạn',
+    ACCESS_TOKEN_REQUIRED: 'Thiếu access token',
     INVALID_REFRESH_TOKEN: 'Refresh token không hợp lệ hoặc đã hết hạn',
     USER_NOT_FOUND: 'Không tìm thấy người dùng',
     ACCOUNT_DISABLED: 'Tài khoản đã bị vô hiệu hoá',
