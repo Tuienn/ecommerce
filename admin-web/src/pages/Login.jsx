@@ -29,7 +29,8 @@ const Login = () => {
             saveAuthToken(data.data.refreshToken, {
                 role: data.data.role,
                 name: data.data.name,
-                email: data.data.email
+                email: data.data.email,
+                _id: data.data._id
             })
             showNotification('success', 'Đăng nhập thành công')
             debounce(() => {

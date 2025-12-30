@@ -90,7 +90,7 @@ export default function ReviewList({ productId }: ReviewListProps) {
     }
 
     const renderHeader = () => (
-        <View className='mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4'>
+        <View className='mb-4 rounded-lg border border-gray-200 bg-background p-4'>
             <Text className='mb-2 text-base font-bold text-gray-900'>Đánh giá sản phẩm</Text>
             {totalReviews > 0 ? (
                 renderRatingStars()

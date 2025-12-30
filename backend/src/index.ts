@@ -3,6 +3,7 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 import http from 'http'
 import helmet from 'helmet'
+import { Server } from 'socket.io'
 import 'dotenv/config'
 import routes from './modules/index.route'
 import { limiter } from './middlewares/rateLimiter.middleware'
@@ -10,13 +11,25 @@ import { sanitize } from './middlewares/sanitize.middleware'
 import httpLogger from './middlewares/http.middleware'
 import './db/init.mongodb'
 import { checkOverLoad } from './helpers/check.connect'
-import validateBody from './middlewares/validateBody.middleware'
 import { errorMiddleware, notFoundMiddleware } from './middlewares/error.middleware'
+import { initSocketHandler } from './socket/index'
 
 checkOverLoad()
 
 const app = express()
 const server = http.createServer(app)
+
+// Initialize Socket.IO
+const io = new Server(server, {
+    cors: {
+        origin: process.env.CORS_ORIGIN?.split(',') || ['*'],
+        methods: ['GET', 'POST'],
+        credentials: true
+    }
+})
+
+// Initialize socket handlers
+initSocketHandler(io)
 
 app.use(helmet())
 
@@ -36,7 +49,7 @@ app.set('trust proxy', 1)
 app.use(bodyParser.json({ limit: '5mb' }))
 app.use(express.urlencoded({ extended: true, limit: '5mb' }))
 
-// HTTP Logger - chỉ bật khi development
+// HTTP Logger - only enable in development
 if (process.env.NODE_ENV !== 'production') {
     app.use(httpLogger)
 }
@@ -52,18 +65,15 @@ if (process.env.NODE_ENV === 'production') {
     app.use('/v1', limiter)
 }
 
-// app.use(validateBody)
 app.use('/v1', routes)
 
-// 404 handler - replace existing 404 middleware
+// 404 handler
 app.use(notFoundMiddleware)
-// Global error handler - replace existing error middleware
+// Global error handler
 app.use(errorMiddleware)
-
-// const socketManager = require('./src/socket/index.socket')
-// socketManager.init(server)
 
 const PORT = process.env.PORT || 4000
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
+    console.log(`🚀 Server running on port ${PORT}`)
+    console.log(`💬 Socket.IO initialized for E2E chat`)
 })

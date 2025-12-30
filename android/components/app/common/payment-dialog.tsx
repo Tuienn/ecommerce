@@ -133,7 +133,10 @@ export default function PaymentDialog({ open, onOpenChange, checkoutData, onSucc
                                 <View className='gap-3'>
                                     {/* Items List */}
                                     {checkoutData.items.map((item, index) => (
-                                        <View key={index} className='rounded-lg border border-gray-200 bg-gray-50 p-3'>
+                                        <View
+                                            key={index}
+                                            className='rounded-lg border border-gray-200 bg-background p-3'
+                                        >
                                             <Text className='font-medium text-gray-900'>{item.name}</Text>
                                             <View className='mt-2 flex-row items-center justify-between'>
                                                 <Text className='text-sm text-gray-600'>

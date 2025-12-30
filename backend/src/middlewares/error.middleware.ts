@@ -24,11 +24,13 @@ export const errorMiddleware = (error: CustomError, req: Request, res: Response,
     })
 
     let statusCode: number =
-        typeof error.statusCode === 'number'
-            ? error.statusCode
-            : typeof error.code === 'number'
-              ? error.code
-              : StatusCodes.INTERNAL_SERVER_ERROR
+        typeof error.status === 'number'
+            ? error.status
+            : typeof error.statusCode === 'number'
+              ? error.statusCode
+              : typeof error.code === 'number'
+                ? error.code
+                : StatusCodes.INTERNAL_SERVER_ERROR
 
     let message: string = error.message || ReasonPhrases.INTERNAL_SERVER_ERROR
 

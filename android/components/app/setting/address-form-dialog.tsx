@@ -137,7 +137,7 @@ export default function AddressFormDialog({ open, onOpenChange, address, onSave,
                         </View>
 
                         {/* Is Default */}
-                        <View className='flex-row items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3'>
+                        <View className='flex-row items-center justify-between rounded-lg border border-gray-200 bg-background p-3'>
                             <Label className='text-sm font-medium'>Đặt làm địa chỉ mặc định</Label>
                             <Switch
                                 checked={formData.isDefault}

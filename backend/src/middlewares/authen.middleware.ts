@@ -9,23 +9,23 @@ const authenticateToken = async (req: Request, _res: Response, next: NextFunctio
     const token = authHeader && authHeader.split(' ')[1]
 
     if (!token) {
-        throw new AuthFailureError('Access token không được cung cấp')
+        return next(new AuthFailureError(AUTH.ACCESS_TOKEN_REQUIRED))
     }
 
     const decoded = verifyAccessToken(token)
 
     if (!decoded || typeof decoded === 'string' || !decoded.userId) {
-        throw new AuthFailureError(AUTH.INVALID_ACCESS_TOKEN)
+        return next(new AuthFailureError(AUTH.INVALID_ACCESS_TOKEN))
     }
 
     const user = await User.findById(decoded.userId).lean()
 
     if (!user) {
-        throw new NotFoundError(AUTH.USER_NOT_FOUND + ' từ access token')
+        return next(new NotFoundError(AUTH.USER_NOT_FOUND + ' từ access token'))
     }
 
     if (user.isActive === false) {
-        throw new ForbiddenError(AUTH.ACCOUNT_DISABLED)
+        return next(new ForbiddenError(AUTH.ACCOUNT_DISABLED))
     }
 
     req.user = user

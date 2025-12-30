@@ -75,7 +75,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             </View>
 
             {/* Sold Count */}
-            <View className='flex-row items-center gap-2 rounded-lg bg-gray-50 p-3'>
+            <View className='flex-row items-center gap-2 rounded-lg bg-background p-3'>
                 <Text className='text-sm text-gray-600'>Đã bán:</Text>
                 <Text className='text-sm font-semibold text-green-600'>
                     {formatSoldCount(product.soldCount)} {product.unit}

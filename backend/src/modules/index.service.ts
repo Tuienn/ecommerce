@@ -6,6 +6,9 @@ import ProductService from './product/product.service'
 import CartService from './cart/cart.service'
 import OrderService from './order/order.service'
 import ReviewService from './review/review.service'
+import ChatService from './chat/chat.service'
+import MessageService from './message/message.service'
+import UserChatKeyService from './userChatKey/userChatkey.service'
 
 export {
     UserService,
@@ -15,5 +18,8 @@ export {
     ProductService,
     CartService,
     OrderService,
-    ReviewService
+    ReviewService,
+    ChatService,
+    MessageService,
+    UserChatKeyService
 }

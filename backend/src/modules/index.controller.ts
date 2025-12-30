@@ -6,6 +6,9 @@ import ProductController from './product/product.controller'
 import CartController from './cart/cart.controller'
 import OrderController from './order/order.controller'
 import ReviewController from './review/review.controller'
+import ChatController from './chat/chat.controller'
+import MessageController from './message/message.controller'
+import UserChatKeyController from './userChatKey/userChatkey.controller'
 
 export {
     UserController,
@@ -15,5 +18,8 @@ export {
     ProductController,
     CartController,
     OrderController,
-    ReviewController
+    ReviewController,
+    ChatController,
+    MessageController,
+    UserChatKeyController
 }

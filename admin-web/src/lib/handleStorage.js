@@ -63,4 +63,18 @@ export const getAuthToken = () => {
 export const clearToken = () => {
     removeDataStorage('accessToken', 'session')
     removeDataStorage('authToken', 'local')
+    removeDataStorage('secretChatKey', 'session')
+}
+
+export const saveSecretChatKey = (secretKey, userId) => {
+    saveDataStorage(`secretChatKey`, encrypt(JSON.stringify({ secretKey, userId })), 'session')
+}
+
+export const getSecretChatKey = () => {
+    const secretKey = getDataStorage(`secretChatKey`, 'session')
+    return secretKey ? JSON.parse(decrypt(secretKey)) : null
+}
+
+export const clearSecretChatKey = () => {
+    removeDataStorage(`secretChatKey`, 'session')
 }

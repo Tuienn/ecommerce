@@ -81,4 +81,24 @@ export const getRefreshToken = () => getDataStorage('refreshToken')
 export const clearAuthToken = async () => {
     await removeDataStorage('accessToken')
     await removeDataStorage('refreshToken')
+    await clearSecretChatKey()
+}
+
+export const saveSecretChatKey = async (secretKey: string, oderId: string) => {
+    const data = JSON.stringify({ secretKey, oderId })
+    await saveDataStorage('secretChatKey', data)
+}
+
+export const getSecretChatKey = async (): Promise<{ secretKey: string; oderId: string } | null> => {
+    const data = await getDataStorage('secretChatKey')
+    if (!data) return null
+    try {
+        return JSON.parse(data)
+    } catch {
+        return null
+    }
+}
+
+export const clearSecretChatKey = async () => {
+    await removeDataStorage('secretChatKey')
 }
