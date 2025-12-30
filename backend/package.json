@@ -28,7 +28,8 @@
         "multer-storage-cloudinary": "^4.0.0",
         "node-cron": "^4.2.1",
         "nodemailer": "^7.0.6",
-        "socket.io": "^4.8.3"
+        "socket.io": "^4.8.3",
+        "xss": "^1.0.15"
     },
     "devDependencies": {
         "@types/body-parser": "^1.19.6",

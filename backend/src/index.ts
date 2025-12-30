@@ -7,7 +7,7 @@ import { Server } from 'socket.io'
 import 'dotenv/config'
 import routes from './modules/index.route'
 import { limiter } from './middlewares/rateLimiter.middleware'
-import { sanitize } from './middlewares/sanitize.middleware'
+import { sanitizeInput } from './middlewares/sanitize.middleware'
 import httpLogger from './middlewares/http.middleware'
 import './db/init.mongodb'
 import { checkOverLoad } from './helpers/check.connect'
@@ -54,15 +54,10 @@ if (process.env.NODE_ENV !== 'production') {
     app.use(httpLogger)
 }
 
-app.use((req, _res, next) => {
-    if (req.body) sanitize(req.body)
-    if (req.query) sanitize(req.query)
-    if (req.params) sanitize(req.params)
-    next()
-})
+app.use(sanitizeInput)
 
 if (process.env.NODE_ENV === 'production') {
-    app.use('/v1', limiter)
+    app.use('/v1', limiter(1 * 60 * 1000, 100))
 }
 
 app.use('/v1', routes)
