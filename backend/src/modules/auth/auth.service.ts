@@ -7,6 +7,7 @@ import {
     ConflictRequestError
 } from '../../exceptions/error.handler'
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../utils/handleJwt'
+import { hashToken } from '../../utils/crypto'
 import { OTPService, UserService } from '../index.service'
 import { AUTH } from '../../constants/text'
 
@@ -36,7 +37,13 @@ class AuthService {
         const accessToken = generateAccessToken(tokenPayload)
         const refreshToken = generateRefreshToken({ userId: user._id })
 
-        await Auth.findOneAndUpdate({ user: user._id }, { refreshToken, revokedAt: null }, { upsert: true, new: true })
+        // Hash refresh token trước khi lưu vào DB
+        const hashedRefreshToken = hashToken(refreshToken)
+        await Auth.findOneAndUpdate(
+            { user: user._id },
+            { refreshToken: hashedRefreshToken, revokedAt: null },
+            { upsert: true, new: true }
+        )
 
         const expiredTime = new Date(Date.now() + 15 * 60 * 1000).toISOString()
 
@@ -59,10 +66,11 @@ class AuthService {
             throw new AuthFailureError(AUTH.INVALID_REFRESH_TOKEN)
         }
 
-        // 2. Kiểm tra refresh token trong DB
+        // 2. Hash token input và kiểm tra trong DB
+        const hashedToken = hashToken(refreshTokenString)
         const tokenDoc = await Auth.findOne({
             user: decoded.userId,
-            refreshToken: refreshTokenString
+            refreshToken: hashedToken
         })
 
         if (!tokenDoc) {
@@ -106,10 +114,11 @@ class AuthService {
             throw new AuthFailureError(AUTH.INVALID_REFRESH_TOKEN)
         }
 
-        // 2. Tìm token trong DB
+        // 2. Hash token input và tìm trong DB
+        const hashedToken = hashToken(refreshTokenString)
         const tokenDoc = await Auth.findOne({
             user: decoded.userId,
-            refreshToken: refreshTokenString
+            refreshToken: hashedToken
         })
 
         if (!tokenDoc) {
@@ -214,9 +223,11 @@ class AuthService {
         const accessToken = generateAccessToken(tokenPayload)
         const refreshToken = generateRefreshToken({ userId: newUser._id })
 
+        // Hash refresh token trước khi lưu vào DB
+        const hashedRefreshToken = hashToken(refreshToken)
         await Auth.findOneAndUpdate(
             { user: newUser._id },
-            { refreshToken, revokedAt: null },
+            { refreshToken: hashedRefreshToken, revokedAt: null },
             { upsert: true, new: true }
         )
 
@@ -264,7 +275,13 @@ class AuthService {
         const accessToken = generateAccessToken(tokenPayload)
         const refreshToken = generateRefreshToken({ userId: user._id })
 
-        await Auth.findOneAndUpdate({ user: user._id }, { refreshToken, revokedAt: null }, { upsert: true, new: true })
+        // Hash refresh token trước khi lưu vào DB
+        const hashedRefreshToken = hashToken(refreshToken)
+        await Auth.findOneAndUpdate(
+            { user: user._id },
+            { refreshToken: hashedRefreshToken, revokedAt: null },
+            { upsert: true, new: true }
+        )
 
         const expiredTime = new Date(Date.now() + 15 * 60 * 1000).toISOString()
 

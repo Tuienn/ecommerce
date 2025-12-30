@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose'
-import { OTP_TTL_SECONDS } from '../../../constants/common'
 import { IOTP } from '../../../types/auth'
+
+const OTP_TTL_SECONDS = process.env.OTP_TTL_SECONDS || 300
 
 const OTPSchema = new Schema<IOTP>({
     phone: { type: String, unique: true, sparse: true },

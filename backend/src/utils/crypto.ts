@@ -50,3 +50,13 @@ export const comparePassword = (password: string, hashedValue: string): boolean 
         return false
     }
 }
+
+/**
+ * Hash token (refresh token) bằng SHA-256
+ * Dùng SHA-256 vì refresh token đã là random string dài, không cần PBKDF2
+ * @param token Token gốc
+ * @returns Hash của token
+ */
+export const hashToken = (token: string): string => {
+    return crypto.createHash('sha256').update(token).digest('hex')
+}
