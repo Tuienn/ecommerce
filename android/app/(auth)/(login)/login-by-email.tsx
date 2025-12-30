@@ -65,7 +65,8 @@ const LoginByEmailScreen: React.FC = () => {
                 showNotification('success', 'Đăng nhập thành công')
                 await login(res.data.accessToken, res.data.refreshToken, {
                     name: res.data.name,
-                    role: res.data.role
+                    role: res.data.role,
+                    _id: res.data._id
                 })
                 router.replace('/')
             } else {
@@ -109,7 +110,8 @@ const LoginByEmailScreen: React.FC = () => {
                     showNotification('success', 'Đăng nhập thành công')
                     await login(loginRes.data.accessToken, loginRes.data.refreshToken, {
                         name: loginRes.data.name,
-                        role: loginRes.data.role
+                        role: loginRes.data.role,
+                        _id: loginRes.data._id
                     })
                     router.replace('/')
                 } else {

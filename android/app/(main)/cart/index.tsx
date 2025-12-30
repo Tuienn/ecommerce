@@ -234,7 +234,7 @@ const CartScreen = () => {
     // Guest mode UI
     if (!isAuth) {
         return (
-            <View className='flex-1 bg-gray-50'>
+            <View className='flex-1 bg-background'>
                 {/* Header */}
                 <View className='border-b border-gray-200 bg-white px-4 py-4'>
                     <Text className='text-xl font-bold text-gray-900'>Giỏ hàng</Text>
@@ -258,7 +258,7 @@ const CartScreen = () => {
 
     // Authenticated user UI
     return (
-        <View className='flex-1 bg-gray-50'>
+        <View className='flex-1 bg-background'>
             {/* Search Header */}
             <View className='border-b border-gray-100 bg-white px-4 py-3'>
                 <View className='flex-row items-center gap-2'>

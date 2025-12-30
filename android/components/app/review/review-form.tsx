@@ -195,7 +195,7 @@ export default function ReviewForm({
             <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
                 <View className='gap-6 p-4'>
                     {/* Rating */}
-                    <View className='items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 py-6'>
+                    <View className='items-center gap-3 rounded-lg border border-gray-200 bg-background py-6'>
                         <Text className='text-base font-medium'>Đánh giá của bạn</Text>
                         <View className='flex-row gap-2'>
                             {[1, 2, 3, 4, 5].map((star) => (
@@ -260,7 +260,7 @@ export default function ReviewForm({
                             {!isReadOnly && images.length < 5 && (
                                 <TouchableOpacity
                                     onPress={handlePickImage}
-                                    className='h-24 w-24 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50'
+                                    className='h-24 w-24 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-background'
                                     activeOpacity={0.7}
                                 >
                                     <Camera size={24} color='#9ca3af' />

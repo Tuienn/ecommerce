@@ -168,7 +168,7 @@ export default function OrderScreen() {
     // Guest mode UI
     if (!isAuth) {
         return (
-            <View className='flex-1 bg-gray-50'>
+            <View className='flex-1 bg-background'>
                 {/* Header */}
                 <View className='border-b border-gray-200 bg-white px-4 py-4'>
                     <Text className='text-xl font-bold text-gray-900'>Đơn hàng</Text>
@@ -193,7 +193,7 @@ export default function OrderScreen() {
 
     // Authenticated user UI
     return (
-        <View className='flex-1 bg-gray-50'>
+        <View className='flex-1 bg-background'>
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as OrderStatus)} className='flex-1'>
                 <View className='bg-white px-4 py-2'>

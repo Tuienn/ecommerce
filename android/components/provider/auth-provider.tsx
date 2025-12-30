@@ -35,6 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     const res = await AuthSerice.getCurrentUserProfile()
                     if (res && res.data) {
                         setUser({
+                            _id: res.data._id,
                             name: res.data.name,
                             role: res.data.role
                         })
@@ -61,6 +62,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                         await saveRefreshToken(res.data.refreshToken)
                     }
                     setUser({
+                        _id: res.data._id,
                         name: res.data.name,
                         role: res.data.role
                     })
@@ -87,6 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             await saveAccessToken(accessToken)
             await saveRefreshToken(refreshToken)
             setUser({
+                _id: user._id,
                 name: user.name,
                 role: user.role
             })

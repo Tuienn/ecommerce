@@ -176,7 +176,7 @@ const HomeScreen = () => {
     }
 
     return (
-        <View className='flex-1 bg-gray-50'>
+        <View className='flex-1 bg-background'>
             {/* Search and Filter Header */}
             <View className='border-b border-gray-100 bg-background px-4 py-3'>
                 <View className='flex-row items-center gap-2'>

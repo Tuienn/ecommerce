@@ -179,7 +179,7 @@ export default function OrderDetailDialog({ open, onOpenChange, order }: OrderDe
                         <View className='gap-2'>
                             <Text className='text-sm font-medium text-gray-700'>Sản phẩm</Text>
                             {order.items.map((item, index) => (
-                                <View key={index} className='rounded-lg border border-gray-200 bg-gray-50 p-3'>
+                                <View key={index} className='rounded-lg border border-gray-200 bg-background p-3'>
                                     <Text className='font-medium text-gray-900'>{item.name}</Text>
                                     <View className='mt-2 flex-row items-center justify-between'>
                                         <Text className='text-sm text-gray-600'>
@@ -205,7 +205,7 @@ export default function OrderDetailDialog({ open, onOpenChange, order }: OrderDe
                         {/* Shipping Address */}
                         <View className='gap-2'>
                             <Text className='text-sm font-medium text-gray-700'>Địa chỉ giao hàng</Text>
-                            <View className='rounded-lg border border-gray-200 bg-gray-50 p-3'>
+                            <View className='rounded-lg border border-gray-200 bg-background p-3'>
                                 <Text className='font-medium text-gray-900'>{order.shippingAddress.name}</Text>
                                 <Text className='mt-1 text-sm text-gray-600'>{order.shippingAddress.phone}</Text>
                                 <Text className='mt-1 text-sm text-gray-600'>
@@ -218,7 +218,7 @@ export default function OrderDetailDialog({ open, onOpenChange, order }: OrderDe
                         {/* Payment Info */}
                         <View className='gap-2'>
                             <Text className='text-sm font-medium text-gray-700'>Thanh toán</Text>
-                            <View className='rounded-lg border border-gray-200 bg-gray-50 p-3'>
+                            <View className='rounded-lg border border-gray-200 bg-background p-3'>
                                 <View className='flex-row items-center justify-between'>
                                     <Text className='text-sm text-gray-600'>Phương thức:</Text>
                                     <Text className='font-medium text-gray-900'>{order.payment.provider}</Text>

@@ -125,7 +125,7 @@ export default function SettingScreen() {
     // Guest mode UI
     if (!isAuth) {
         return (
-            <View className='flex-1 bg-gray-50'>
+            <View className='flex-1 bg-background'>
                 {/* Header */}
                 <View className='border-b border-gray-200 bg-white px-4 py-4'>
                     <Text className='text-xl font-bold text-gray-900'>Cài đặt</Text>
@@ -187,14 +187,14 @@ export default function SettingScreen() {
 
     // Authenticated user UI
     return (
-        <View className='flex-1 bg-gray-50'>
+        <View className='flex-1 bg-background'>
             {/* Header */}
             <View className='border-b border-gray-200 bg-white px-4 py-4'>
                 <View className='flex-row items-center justify-between'>
                     <Text className='text-xl font-bold text-gray-900'>Cài đặt</Text>
-                    <Button onPress={logout} className='flex-row items-center gap-2 rounded-lg bg-red-50 px-3 py-2'>
-                        <LogOut size={18} color='#dc2626' />
-                        <Text className='text-sm font-medium text-red-600'>Đăng xuất</Text>
+                    <Button onPress={logout} variant={'destructive'}>
+                        <LogOut size={18} color='white' />
+                        <Text>Đăng xuất</Text>
                     </Button>
                 </View>
             </View>

@@ -257,7 +257,7 @@ export default function RegisterByPhoneScreen() {
 
                             {/* Polling Status */}
                             {polling && (
-                                <View className='items-center gap-4 rounded-lg border border-gray-200 bg-gray-50 p-6'>
+                                <View className='items-center gap-4 rounded-lg border border-gray-200 bg-background p-6'>
                                     <View className='h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-green-600' />
                                     <View className='items-center gap-1'>
                                         <Text className='font-medium text-gray-900'>Đang chờ xác thực...</Text>
