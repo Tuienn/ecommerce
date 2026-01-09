@@ -4,19 +4,29 @@ import asyncHandler from '../../helpers/asyncHandler'
 import authenticateToken from '../../middlewares/authen.middleware'
 import authorize from '../../middlewares/authorize.middleware'
 import upload from '../../middlewares/uploadCloudinary.middleware'
+import { cacheMiddleware } from '../../middlewares/cache.middleware'
+import { cacheEvictMiddleware } from '../../middlewares/cacheEvict.middleware'
 
 const router: RouterType = Router()
 
-// Public routes
-router.get('/product/:productId', asyncHandler(ReviewController.getReviewsByProduct))
+// Public routes - CACHE
+router.get(
+    '/product/:productId',
+    cacheMiddleware(600), // 10 phút
+    asyncHandler(ReviewController.getReviewsByProduct)
+)
 
-// Customer routes - Tạo review với upload ảnh/video
+// Customer routes - CACHE EVICT
 router.post(
     '/upload',
     authenticateToken,
     authorize('customer'),
-    upload.array('files', 5), // Max 5 files per review
-    asyncHandler(ReviewController.createReview)
+    upload.array('files', 5),
+    asyncHandler(ReviewController.createReview),
+    cacheEvictMiddleware({
+        // Xóa cache reviews của product này
+        keys: [(req) => `cache:GET:/v1/reviews/product/${req.body.productId}`]
+    })
 )
 
 // Customer routes - Lấy reviews của mình
@@ -39,10 +49,20 @@ router.put(
     authenticateToken,
     authorize('customer'),
     upload.array('files', 5),
-    asyncHandler(ReviewController.updateReview)
+    asyncHandler(ReviewController.updateReview),
+    cacheEvictMiddleware({
+        pattern: 'cache:GET:/v1/reviews/product/*' // Xóa tất cả review cache
+    })
 )
 
-// Admin routes - Xóa review
-router.delete('/:_id', authenticateToken, authorize('admin'), asyncHandler(ReviewController.deleteReview))
+router.delete(
+    '/:_id',
+    authenticateToken,
+    authorize('admin'),
+    asyncHandler(ReviewController.deleteReview),
+    cacheEvictMiddleware({
+        pattern: 'cache:GET:/v1/reviews/product/*'
+    })
+)
 
 export default router
