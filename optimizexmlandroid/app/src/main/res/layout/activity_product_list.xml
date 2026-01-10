@@ -5,15 +5,51 @@
     android:layout_height="match_parent"
     android:background="?android:attr/colorBackground">
 
+    <!-- RecyclerView - Initially hidden, shown when data loaded -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvProducts"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:padding="@dimen/spacing_small"
         android:clipToPadding="false"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Loading State ViewStub -->
+    <ViewStub
+        android:id="@+id/viewStubLoading"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout="@layout/layout_loading"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Empty State ViewStub -->
+    <ViewStub
+        android:id="@+id/viewStubEmpty"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout="@layout/layout_empty"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Error State ViewStub -->
+    <ViewStub
+        android:id="@+id/viewStubError"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout="@layout/layout_error"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">optimize-xml-android</string>
+    
+    <!-- Loading State -->
+    <string name="loading_message">Đang tải sản phẩm…</string>
+    
+    <!-- Empty State -->
+    <string name="empty_title">Không có sản phẩm</string>
+    <string name="empty_message">Không tìm thấy sản phẩm nào. Vui lòng thử lại sau.</string>
+    
+    <!-- Error State -->
+    <string name="error_title">Đã có lỗi xảy ra</string>
+    <string name="error_message">Không thể tải dữ liệu. Vui lòng kiểm tra kết nối mạng.</string>
+    
+    <!-- Common -->
+    <string name="retry_button">Thử lại</string>
 </resources>
