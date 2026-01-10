@@ -46,17 +46,23 @@ public class ProductListActivity extends AppCompatActivity {
         stateManager = new StateManager(rvProducts, viewStubLoading, viewStubEmpty, viewStubError);
         stateManager.setOnRetryListener(this::loadFirstPage);
         
-        // Set GridLayoutManager with 2 columns
-        layoutManager = new GridLayoutManager(this, 2);
+        // Get column count from resources (2 for mobile, 3 for tablets)
+        int columnCount = getResources().getInteger(R.integer.grid_column_count);
+        
+        // Set GridLayoutManager with responsive columns
+        layoutManager = new GridLayoutManager(this, columnCount);
         
         // Make loading item span full width
-        layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+        GridLayoutManager.SpanSizeLookup spanSizeLookup = new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                // Loading item takes full width (2 columns)
-                return productAdapter.getItemViewType(position) == 1 ? 2 : 1;
+                // Loading item takes full width (all columns)
+                return productAdapter.getItemViewType(position) == 1 ? columnCount : 1;
             }
-        });
+        };
+        // Enable caching to improve scroll performance
+        spanSizeLookup.setSpanIndexCacheEnabled(true);
+        layoutManager.setSpanSizeLookup(spanSizeLookup);
         
         rvProducts.setLayoutManager(layoutManager);
         

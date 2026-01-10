@@ -19,4 +19,7 @@
     <dimen name="discount_badge_padding_horizontal">6dp</dimen>
     <dimen name="discount_badge_padding_vertical">3dp</dimen>
     <dimen name="discount_badge_corner_radius">4dp</dimen>
+    
+    <!-- Grid Columns -->
+    <integer name="grid_column_count">2</integer>
 </resources>
