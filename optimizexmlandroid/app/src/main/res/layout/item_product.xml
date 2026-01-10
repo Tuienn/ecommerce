@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:parentTag="androidx.cardview.widget.CardView">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/spacing_normal">
+
+        <!-- Product Image Placeholder -->
+        <View
+            android:id="@+id/ivProductImage"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/product_image_height"
+            android:background="#E0E0E0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Product Name -->
+        <TextView
+            android:id="@+id/tvProductName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="@dimen/text_size_normal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivProductImage"
+            tools:text="Áo thun nam cotton" />
+
+        <!-- Price Container -->
+        <TextView
+            android:id="@+id/tvPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:textColor="#D32F2F"
+            android:textSize="@dimen/text_size_medium"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvProductName"
+            tools:text="150.000đ" />
+
+        <!-- Base Price (strikethrough) -->
+        <TextView
+            android:id="@+id/tvBasePrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:textColor="?android:textColorSecondary"
+            android:textSize="@dimen/text_size_small"
+            app:layout_constraintBottom_toBottomOf="@id/tvPrice"
+            app:layout_constraintStart_toEndOf="@id/tvPrice"
+            app:layout_constraintTop_toTopOf="@id/tvPrice"
+            tools:text="200.000đ" />
+
+        <!-- Discount Badge -->
+        <TextView
+            android:id="@+id/tvDiscountPercent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:background="@drawable/bg_discount_badge"
+            android:paddingStart="@dimen/discount_badge_padding_horizontal"
+            android:paddingTop="@dimen/discount_badge_padding_vertical"
+            android:paddingEnd="@dimen/discount_badge_padding_horizontal"
+            android:paddingBottom="@dimen/discount_badge_padding_vertical"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/text_size_small"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPrice"
+            tools:text="-25%" />
+
+        <!-- Sold Count -->
+        <TextView
+            android:id="@+id/tvSoldCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:textColor="?android:textColorSecondary"
+            android:textSize="@dimen/text_size_small"
+            app:layout_constraintBottom_toBottomOf="@id/tvDiscountPercent"
+            app:layout_constraintStart_toEndOf="@id/tvDiscountPercent"
+            app:layout_constraintTop_toTopOf="@id/tvDiscountPercent"
+            tools:text="Đã bán 1.2K" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</merge>
