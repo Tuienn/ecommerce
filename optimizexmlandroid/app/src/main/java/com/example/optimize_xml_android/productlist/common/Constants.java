@@ -3,7 +3,9 @@ package com.example.optimize_xml_android.productlist.common;
 public class Constants {
     
     // API Configuration
-    public static final String BASE_URL = "https://6851a42217fe.ngrok-free.app";
+    // Use 10.0.2.2 for Android Emulator
+    // Use your computer's IP address (e.g., 192.168.x.x) for physical device
+    public static final String BASE_URL = "http://192.168.102.15:4000";
     
     // Pagination Configuration
     public static final int PAGE_SIZE = 10;

@@ -322,10 +322,10 @@ class ProductController {
             const productId = req.params._id
 
             // Parse và validate tất cả fields (JSON body)
-            const updateData = this.parseProductFields(req.body, false)
+            const updateData = ProductController.parseProductFields(req.body, false)
 
             // Xử lý images
-            const images = this.handleUpdateImages(req.body)
+            const images = ProductController.handleUpdateImages(req.body)
             if (images !== undefined) {
                 updateData.images = images
             }
@@ -343,10 +343,10 @@ class ProductController {
             const productId = req.params._id
 
             // Parse và validate tất cả fields (form-data body)
-            const updateData = this.parseProductFields(req.body, true)
+            const updateData = ProductController.parseProductFields(req.body, true)
 
             // Xử lý images (oldImages + uploaded files)
-            const images = this.handleUpdateImages(req.body, req.files)
+            const images = ProductController.handleUpdateImages(req.body, req.files)
             if (images !== undefined) {
                 updateData.images = images
             }

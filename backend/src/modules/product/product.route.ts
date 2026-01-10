@@ -22,7 +22,7 @@ router.post(
     authorize('admin'),
     upload.array('files', 10),
     asyncHandler(ProductController.createProduct),
-    cacheEvictMiddleware({ pattern: 'cache:GET:/v1/products*' })
+    cacheEvictMiddleware({ pattern: 'cache:GET:/v1/api/product*' })
 )
 router.put(
     '/:_id/upload',
@@ -31,8 +31,8 @@ router.put(
     upload.array('files', 10),
     asyncHandler(ProductController.updateProductWithUpload),
     cacheEvictMiddleware({
-        pattern: 'cache:GET:/v1/products*',
-        keys: [(req) => `cache:GET:/v1/products/${req.params._id}`]
+        pattern: 'cache:GET:/v1/api/product*',
+        keys: [(req) => `cache:GET:/v1/api/product/${req.params._id}`]
     })
 )
 router.put(
@@ -41,8 +41,8 @@ router.put(
     authorize('admin'),
     asyncHandler(ProductController.updateProductById),
     cacheEvictMiddleware({
-        pattern: 'cache:GET:/v1/products*',
-        keys: [(req) => `cache:GET:/v1/products/${req.params._id}`]
+        pattern: 'cache:GET:/v1/api/product*',
+        keys: [(req) => `cache:GET:/v1/api/product/${req.params._id}`]
     })
 )
 router.delete(
@@ -50,7 +50,7 @@ router.delete(
     authenticateToken,
     authorize('admin'),
     asyncHandler(ProductController.deleteProductById),
-    cacheEvictMiddleware({ pattern: 'cache:GET:/v1/products*' })
+    cacheEvictMiddleware({ pattern: 'cache:GET:/v1/api/product*' })
 )
 router.patch(
     '/:_id/active',
@@ -58,8 +58,8 @@ router.patch(
     authorize('admin'),
     asyncHandler(ProductController.setActiveById),
     cacheEvictMiddleware({
-        pattern: 'cache:GET:/v1/products*',
-        keys: [(req) => `cache:GET:/v1/products/${req.params._id}`]
+        pattern: 'cache:GET:/v1/api/product*',
+        keys: [(req) => `cache:GET:/v1/api/product/${req.params._id}`]
     })
 )
 
