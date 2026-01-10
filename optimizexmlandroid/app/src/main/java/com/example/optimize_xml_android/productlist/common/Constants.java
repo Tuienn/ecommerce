@@ -3,7 +3,7 @@ package com.example.optimize_xml_android.productlist.common;
 public class Constants {
     
     // API Configuration
-    public static final String BASE_URL = "https://584840a9c095.ngrok-free.app";
+    public static final String BASE_URL = "https://6851a42217fe.ngrok-free.app";
     
     // Pagination Configuration
     public static final int PAGE_SIZE = 10;

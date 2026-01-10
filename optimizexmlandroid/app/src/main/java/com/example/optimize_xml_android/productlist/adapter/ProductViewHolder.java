@@ -23,9 +23,6 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
     private ImageView ivProductImage;
 
     private DecimalFormat priceFormatter;
-    
-    // Tối ưu: Chỉ load ảnh cho 6 item đầu tiên
-    private static final int MAX_IMAGES_TO_LOAD = 6;
 
     public ProductViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -70,25 +67,18 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
     
     /**
      * Load product image with Glide
-     * - Chỉ load 6 ảnh đầu tiên để tối ưu
      * - Sử dụng Cloudinary optimization
      * - Enable Glide disk cache
+     * - Glide tự động lazy load khi view visible
      */
     private void loadProductImage(Product product) {
-        // Clear previous image
+        // Clear previous image to avoid showing wrong image when recycling
         Glide.with(itemView.getContext())
                 .clear(ivProductImage);
         
         // Reset to placeholder
         ivProductImage.setImageDrawable(null);
         ivProductImage.setBackgroundColor(0xFFE0E0E0);
-        
-        // Tối ưu: Chỉ load ảnh cho 6 item đầu tiên
-        int position = getAdapterPosition();
-        if (position == RecyclerView.NO_POSITION || position >= MAX_IMAGES_TO_LOAD) {
-            // Không load ảnh, giữ placeholder
-            return;
-        }
         
         // Get image URL
         String imageUrl = product.getImage();
@@ -101,7 +91,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         int imageWidth = ivProductImage.getWidth();
         if (imageWidth <= 0) {
             // Default width for product thumbnail (adjust based on your design)
-            imageWidth = 400; // pixels
+            imageWidth = 400;
         }
         
         String optimizedUrl = CloudinaryUrlUtil.optimizeToWebp(imageUrl, imageWidth);
@@ -114,6 +104,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
                 .centerCrop(); // Scale type
         
         // Load image with Glide
+        // Glide automatically handles lazy loading - only loads when view is visible
         Glide.with(itemView.getContext())
                 .load(optimizedUrl)
                 .apply(options)
