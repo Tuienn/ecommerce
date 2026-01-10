@@ -9,6 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@null"
         android:padding="@dimen/spacing_normal">
 
         <!-- Product Image Placeholder -->
@@ -27,6 +28,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_normal"
+            android:background="@null"
             android:ellipsize="end"
             android:maxLines="2"
             android:textColor="?android:textColorPrimary"
@@ -42,6 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_small"
+            android:background="@null"
             android:textColor="#D32F2F"
             android:textSize="@dimen/text_size_medium"
             android:textStyle="bold"
@@ -55,6 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_normal"
+            android:background="@null"
             android:textColor="?android:textColorSecondary"
             android:textSize="@dimen/text_size_small"
             app:layout_constraintBottom_toBottomOf="@id/tvPrice"
@@ -86,6 +90,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_normal"
+            android:background="@null"
             android:textColor="?android:textColorSecondary"
             android:textSize="@dimen/text_size_small"
             app:layout_constraintBottom_toBottomOf="@id/tvDiscountPercent"
