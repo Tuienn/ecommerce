@@ -1,20 +1,29 @@
 package com.example.optimize_xml_android.productlist.adapter;
 
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.example.optimize_xml_android.R;
 import com.example.optimize_xml_android.productlist.model.Product;
 import com.example.optimize_xml_android.utils.CloudinaryUrlUtil;
 import java.text.DecimalFormat;
 
 public class ProductViewHolder extends RecyclerView.ViewHolder {
+    private static final String TAG = "CacheTest";
+    
     private TextView tvProductName;
     private TextView tvPrice;
     private TextView tvBasePrice;
@@ -95,6 +104,8 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         }
         
         String optimizedUrl = CloudinaryUrlUtil.optimizeToWebp(imageUrl, imageWidth);
+        final long startTime = System.currentTimeMillis();
+        final String productName = product.getName();
         
         // Configure Glide request options
         RequestOptions options = new RequestOptions()
@@ -103,11 +114,30 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
                 .error(R.color.placeholder_gray) // Error placeholder
                 .centerCrop(); // Scale type
         
-        // Load image with Glide
-        // Glide automatically handles lazy loading - only loads when view is visible
+        // Load image with Glide + cache logging
         Glide.with(itemView.getContext())
                 .load(optimizedUrl)
                 .apply(options)
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model,
+                            Target<Drawable> target, boolean isFirstResource) {
+                        Log.e(TAG, "❌ FAILED: " + productName);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model,
+                            Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        long time = System.currentTimeMillis() - startTime;
+                        String source = dataSource == DataSource.MEMORY_CACHE ? "🟢 MEMORY" :
+                                        dataSource == DataSource.DATA_DISK_CACHE || 
+                                        dataSource == DataSource.RESOURCE_DISK_CACHE ? "🔵 DISK" :
+                                        "🔴 NETWORK";
+                        Log.d(TAG, source + " " + time + "ms | " + productName.substring(0, Math.min(25, productName.length())));
+                        return false;
+                    }
+                })
                 .into(ivProductImage);
     }
 

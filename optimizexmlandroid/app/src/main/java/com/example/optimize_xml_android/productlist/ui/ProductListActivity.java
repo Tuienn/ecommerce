@@ -1,10 +1,13 @@
 package com.example.optimize_xml_android.productlist.ui;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ViewStub;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.example.optimize_xml_android.R;
 import com.example.optimize_xml_android.productlist.adapter.ProductAdapter;
 import com.example.optimize_xml_android.productlist.common.Constants;
@@ -15,9 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductListActivity extends AppCompatActivity {
+    private static final String TAG = "CacheTest";
+    
     private RecyclerView rvProducts;
     private ProductAdapter productAdapter;
     private List<Product> productList;
+    private FloatingActionButton fabReload;
     
     // State management
     private StateManager stateManager;
@@ -30,6 +36,9 @@ public class ProductListActivity extends AppCompatActivity {
     private boolean isLoading = false;
     private boolean isLastPage = false;
     private GridLayoutManager layoutManager;
+    
+    // Reload counter
+    private int reloadCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +47,18 @@ public class ProductListActivity extends AppCompatActivity {
 
         // Initialize views
         rvProducts = findViewById(R.id.rvProducts);
+        fabReload = findViewById(R.id.fabReload);
         ViewStub viewStubLoading = findViewById(R.id.viewStubLoading);
         ViewStub viewStubEmpty = findViewById(R.id.viewStubEmpty);
         ViewStub viewStubError = findViewById(R.id.viewStubError);
+        
+        // Setup reload button
+        fabReload.setOnClickListener(v -> {
+            reloadCount++;
+            Log.d(TAG, "══════════ RELOAD #" + reloadCount + " ══════════");
+            Toast.makeText(this, "Reload #" + reloadCount + " - Check Logcat tag: CacheTest", Toast.LENGTH_SHORT).show();
+            loadFirstPage();
+        });
         
         // Initialize StateManager
         stateManager = new StateManager(rvProducts, viewStubLoading, viewStubEmpty, viewStubError);
