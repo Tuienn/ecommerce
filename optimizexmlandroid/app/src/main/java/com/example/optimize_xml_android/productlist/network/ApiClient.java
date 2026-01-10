@@ -1,19 +1,19 @@
 package com.example.optimize_xml_android.productlist.network;
 
+import com.example.optimize_xml_android.productlist.common.Constants;
 import okhttp3.OkHttpClient;
 import java.util.concurrent.TimeUnit;
 
 public class ApiClient {
-    private static final String BASE_URL = "https://584840a9c095.ngrok-free.app";
     private static ApiClient instance;
     private OkHttpClient okHttpClient;
 
     private ApiClient() {
         // Configure OkHttpClient with timeouts and interceptor for ngrok
         okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(Constants.CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(Constants.READ_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(Constants.WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .addInterceptor(chain -> {
                     // Add ngrok-skip-browser-warning header to bypass ngrok warning page
                     return chain.proceed(
@@ -38,6 +38,6 @@ public class ApiClient {
     }
 
     public String getBaseUrl() {
-        return BASE_URL;
+        return Constants.BASE_URL;
     }
 }

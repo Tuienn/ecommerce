@@ -2,6 +2,7 @@ package com.example.optimize_xml_android.productlist.network;
 
 import android.os.Handler;
 import android.os.Looper;
+import com.example.optimize_xml_android.productlist.common.Constants;
 import com.example.optimize_xml_android.productlist.model.Product;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -15,7 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ProductApiService {
-    private static final String SEARCH_ENDPOINT = "/v1/api/product/search";
     
     private ApiClient apiClient;
     private ExecutorService executorService;
@@ -28,10 +28,15 @@ public class ProductApiService {
     }
 
     public void searchProducts(ApiCallback<List<Product>> callback) {
+        searchProducts(Constants.DEFAULT_PAGE, Constants.DEFAULT_LIMIT, callback);
+    }
+    
+    public void searchProducts(int page, int limit, ApiCallback<List<Product>> callback) {
         executorService.execute(() -> {
             try {
-                // Build request URL
-                String url = apiClient.getBaseUrl() + SEARCH_ENDPOINT;
+                // Build request URL with pagination parameters
+                String url = apiClient.getBaseUrl() + Constants.ENDPOINT_SEARCH_PRODUCTS + 
+                        "?page=" + page + "&limit=" + limit;
                 
                 // Create HTTP request
                 Request request = new Request.Builder()

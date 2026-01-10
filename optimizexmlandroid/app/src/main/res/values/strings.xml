@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">optimize-xml-android</string>
+    <string name="app_name">Danh sách sản phẩm</string>
     
     <!-- Loading State -->
     <string name="loading_message">Đang tải sản phẩm…</string>
