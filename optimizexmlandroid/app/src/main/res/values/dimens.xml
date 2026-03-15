@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spacing -->
+    <dimen name="spacing_small">4dp</dimen>
+    <dimen name="spacing_normal">8dp</dimen>
+    <dimen name="spacing_medium">12dp</dimen>
+    <dimen name="spacing_large">16dp</dimen>
+    
+    <!-- Text Sizes -->
+    <dimen name="text_size_small">12sp</dimen>
+    <dimen name="text_size_normal">14sp</dimen>
+    <dimen name="text_size_medium">16sp</dimen>
+    <dimen name="text_size_large">18sp</dimen>
+    
+    <!-- Product Item -->
+    <dimen name="product_image_height">180dp</dimen>
+    <dimen name="product_card_elevation">2dp</dimen>
+    <dimen name="product_corner_radius">8dp</dimen>
+    <dimen name="discount_badge_padding_horizontal">6dp</dimen>
+    <dimen name="discount_badge_padding_vertical">3dp</dimen>
+    <dimen name="discount_badge_corner_radius">4dp</dimen>
+    
+    <!-- Grid Columns -->
+    <integer name="grid_column_count">2</integer>
+</resources>

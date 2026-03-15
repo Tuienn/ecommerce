@@ -4,55 +4,10 @@ import { Request, Response, NextFunction } from 'express'
 import { redisClient } from '../db/init.redis'
 
 interface CacheEvictOptions {
-    /**
-     * Pattern to match cache keys (e.g., 'products:*', 'cache:GET:/v1/products*')
-     * Uses Redis SCAN command to find matching keys
-     */
     pattern?: string
-    
-    /**
-     * Specific cache keys to evict
-     * Can be static strings or functions that generate keys from request
-     */
     keys?: (string | ((req: Request) => string))[]
 }
 
-/**
- * Cache eviction middleware factory
- * Executes after the route handler completes successfully
- * 
- * @param options - Configuration for cache eviction
- * @returns Express middleware function
- * 
- * @example
- * // Evict all product caches using pattern
- * router.post('/products',
- *   asyncHandler(ProductController.createProduct),
- *   cacheEvictMiddleware({ pattern: 'cache:GET:/v1/products*' })
- * )
- * 
- * @example
- * // Evict specific cache keys
- * router.put('/products/:id',
- *   asyncHandler(ProductController.updateProduct),
- *   cacheEvictMiddleware({
- *     keys: [
- *       (req) => `cache:GET:/v1/products/${req.params.id}`,
- *       'cache:GET:/v1/products'
- *     ]
- *   })
- * )
- * 
- * @example
- * // Evict both pattern and specific keys
- * router.delete('/products/:id',
- *   asyncHandler(ProductController.deleteProduct),
- *   cacheEvictMiddleware({
- *     pattern: 'cache:GET:/v1/products*',
- *     keys: [(req) => `cache:GET:/v1/products/${req.params.id}`]
- *   })
- * )
- */
 export const cacheEvictMiddleware = (options: CacheEvictOptions) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         // Store original res.json function
@@ -147,12 +102,12 @@ async function scanKeys(pattern: string): Promise<string[]> {
     try {
         do {
             // SCAN returns cursor and keys
-            const result = await redisClient.scan(cursor, {
+            const result = await redisClient.scan(cursor.toString(), {
                 MATCH: pattern,
                 COUNT: 100
             })
 
-            cursor = result.cursor
+            cursor = parseInt(result.cursor)
             keys.push(...result.keys)
         } while (cursor !== 0)
 
