@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { redisClient } from '../db/init.redis'
+import { redisClient } from '../db/redis.init'
 
 const generateCacheKey = (req: Request): string => {
     const path = req.originalUrl || req.url

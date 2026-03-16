@@ -21,46 +21,46 @@ router.post(
     authenticateToken,
     authorize('admin'),
     upload.array('files', 10),
-    asyncHandler(ProductController.createProduct),
-    cacheEvictMiddleware({ pattern: 'cache:GET:/v1/api/product*' })
+    cacheEvictMiddleware({ pattern: 'cache:GET:/v1/api/product*' }),
+    asyncHandler(ProductController.createProduct)
 )
 router.put(
     '/:_id/upload',
     authenticateToken,
     authorize('admin'),
     upload.array('files', 10),
-    asyncHandler(ProductController.updateProductWithUpload),
     cacheEvictMiddleware({
         pattern: 'cache:GET:/v1/api/product*',
         keys: [(req) => `cache:GET:/v1/api/product/${req.params._id}`]
-    })
+    }),
+    asyncHandler(ProductController.updateProductWithUpload)
 )
 router.put(
     '/:_id',
     authenticateToken,
     authorize('admin'),
-    asyncHandler(ProductController.updateProductById),
     cacheEvictMiddleware({
         pattern: 'cache:GET:/v1/api/product*',
         keys: [(req) => `cache:GET:/v1/api/product/${req.params._id}`]
-    })
+    }),
+    asyncHandler(ProductController.updateProductById)
 )
 router.delete(
     '/:_id',
     authenticateToken,
     authorize('admin'),
-    asyncHandler(ProductController.deleteProductById),
-    cacheEvictMiddleware({ pattern: 'cache:GET:/v1/api/product*' })
+    cacheEvictMiddleware({ pattern: 'cache:GET:/v1/api/product*' }),
+    asyncHandler(ProductController.deleteProductById)
 )
 router.patch(
     '/:_id/active',
     authenticateToken,
     authorize('admin'),
-    asyncHandler(ProductController.setActiveById),
     cacheEvictMiddleware({
         pattern: 'cache:GET:/v1/api/product*',
         keys: [(req) => `cache:GET:/v1/api/product/${req.params._id}`]
-    })
+    }),
+    asyncHandler(ProductController.setActiveById)
 )
 
 export default router
