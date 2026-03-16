@@ -22,11 +22,11 @@ router.post(
     authenticateToken,
     authorize('customer'),
     upload.array('files', 5),
-    asyncHandler(ReviewController.createReview),
     cacheEvictMiddleware({
         // Xóa cache reviews của product này
         keys: [(req) => `cache:GET:/v1/reviews/product/${req.body.productId}`]
-    })
+    }),
+    asyncHandler(ReviewController.createReview)
 )
 
 // Customer routes - Lấy reviews của mình
@@ -49,20 +49,20 @@ router.put(
     authenticateToken,
     authorize('customer'),
     upload.array('files', 5),
-    asyncHandler(ReviewController.updateReview),
     cacheEvictMiddleware({
         pattern: 'cache:GET:/v1/reviews/product/*' // Xóa tất cả review cache
-    })
+    }),
+    asyncHandler(ReviewController.updateReview)
 )
 
 router.delete(
     '/:_id',
     authenticateToken,
     authorize('admin'),
-    asyncHandler(ReviewController.deleteReview),
     cacheEvictMiddleware({
         pattern: 'cache:GET:/v1/reviews/product/*'
-    })
+    }),
+    asyncHandler(ReviewController.deleteReview)
 )
 
 export default router

@@ -274,7 +274,9 @@ router.delete(
 
 ---
 
-## 3. Workflow Hoàn Chỉnh
+### Workflow Hoàn Chỉnh
+
+> ⚠️ **LƯU Ý QUAN TRỌNG**: `cacheEvictMiddleware` phải được đặt **TRƯỚC** `asyncHandler` (controller). Vì nó hoạt động bằng cách ghi đè `res.json`, nó cần được khởi tạo trước khi controller gọi hàm trả về dữ liệu.
 
 ### Scenario: Product Management
 
