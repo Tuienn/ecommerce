@@ -1,5 +1,3 @@
-'use strict'
-
 import mongoose from 'mongoose'
 import os from 'os'
 const _SECOND = 5000 // 5 seconds

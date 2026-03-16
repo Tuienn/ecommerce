@@ -1,5 +1,3 @@
-'use strict'
-
 import mongoose from 'mongoose'
 import config from '../configs/mongodb.config' // import db config
 import { countConnect } from '../utils/check.connect' // check number of connections

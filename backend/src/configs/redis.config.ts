@@ -1,5 +1,3 @@
-'use strict'
-
 const { REDIS_URL } = process.env
 
 interface IRedisConfig {

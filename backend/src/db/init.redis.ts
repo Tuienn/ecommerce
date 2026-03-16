@@ -1,5 +1,3 @@
-'use strict'
-
 import { createClient } from 'redis'
 import config from '../configs/redis.config'
 

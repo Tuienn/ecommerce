@@ -1,5 +1,3 @@
-'use strict'
-
 const { DB_USER, DB_PASSWORD, DB_HOST, DB_NAME } = process.env
 
 const mongodbUrl = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority&appName=${DB_NAME}`

@@ -1,5 +1,3 @@
-'use strict'
-
 import { Request, Response, NextFunction } from 'express'
 import { redisClient } from '../db/init.redis'
 
