@@ -8,14 +8,10 @@ interface CacheEvictOptions {
 
 export const cacheEvictMiddleware = (options: CacheEvictOptions) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        // Store original res.json function
-        const originalJson = res.json.bind(res)
-
-        // Override res.json to evict cache after successful response
-        res.json = function (body: any) {
-            // Only evict cache on successful responses (2xx status codes)
+        // Lắng nghe sự kiện finish: đảm bảo response đã gửi xong
+        res.on('finish', () => {
+            // Chỉ evict khi response thành công (2xx)
             if (res.statusCode >= 200 && res.statusCode < 300) {
-                // Evict cache asynchronously (don't wait)
                 evictCache(req, options)
                     .then((count) => {
                         if (count > 0) {
@@ -26,10 +22,7 @@ export const cacheEvictMiddleware = (options: CacheEvictOptions) => {
                         console.error('Error evicting cache:', err.message)
                     })
             }
-
-            // Call original json function
-            return originalJson(body)
-        }
+        })
 
         next()
     }
