@@ -23,9 +23,9 @@
         "noFallthroughCasesInSwitch": true,
 
         /* Emit */
-        "declaration": true,
-        "declarationMap": true,
-        "sourceMap": true,
+        "declaration": false,
+        "declarationMap": false,
+        "sourceMap": false,
         "outDir": "./dist",
         "rootDir": "./src",
         "removeComments": true,

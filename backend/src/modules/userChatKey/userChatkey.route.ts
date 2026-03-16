@@ -1,5 +1,5 @@
 import { Router, Router as RouterType } from 'express'
-import asyncHandler from '../../helpers/asyncHandler'
+import asyncHandler from '../../utils/asyncHandler'
 import authenticateToken from '../../middlewares/authen.middleware'
 import { UserChatKeyController } from '../index.controller'
 

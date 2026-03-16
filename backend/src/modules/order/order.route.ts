@@ -1,6 +1,6 @@
 import { OrderController } from '../index.controller'
 import { Router, Router as RouterType } from 'express'
-import asyncHandler from '../../helpers/asyncHandler'
+import asyncHandler from '../../utils/asyncHandler'
 import authenticateToken from '../../middlewares/authen.middleware'
 import authorize from '../../middlewares/authorize.middleware'
 

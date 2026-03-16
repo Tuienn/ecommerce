@@ -1,6 +1,6 @@
 import { OTPController } from '../../index.controller'
 import { Router, Router as RouterType } from 'express'
-import asyncHandler from '../../../helpers/asyncHandler'
+import asyncHandler from '../../../utils/asyncHandler'
 import { limiter } from '../../../middlewares/rateLimiter.middleware'
 
 const router: RouterType = Router()

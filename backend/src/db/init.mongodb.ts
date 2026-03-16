@@ -2,7 +2,7 @@
 
 import mongoose from 'mongoose'
 import config from '../configs/mongodb.config' // import db config
-import { countConnect } from '../helpers/check.connect' // check number of connections
+import { countConnect } from '../utils/check.connect' // check number of connections
 import { UserService } from '../modules/index.service'
 
 const connectString = config.db.url

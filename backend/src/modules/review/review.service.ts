@@ -1,7 +1,7 @@
 import { Order, OrderReview, Product } from '../index.model'
 import { BadRequestError, ConflictRequestError, NotFoundError } from '../../exceptions/error.handler'
 import { Types } from 'mongoose'
-import { saveImagesToDestroyedCollection } from '../../helpers/cloudinary'
+import { saveImagesToDestroyedCollection } from '../../utils/cloudinary'
 
 class ReviewService {
     /**

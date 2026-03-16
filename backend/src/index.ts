@@ -11,7 +11,7 @@ import { sanitizeInput } from './middlewares/sanitize.middleware'
 import httpLogger from './middlewares/http.middleware'
 import './db/init.mongodb'
 import './db/init.redis'
-import { checkOverLoad } from './helpers/check.connect'
+import { checkOverLoad } from './utils/check.connect'
 import { errorMiddleware, notFoundMiddleware } from './middlewares/error.middleware'
 import { initSocketHandler } from './socket/index'
 

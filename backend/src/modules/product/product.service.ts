@@ -1,7 +1,7 @@
 import { Product, Category } from '../index.model'
 import { NotFoundError, BadRequestError, ConflictRequestError } from '../../exceptions/error.handler'
 import { existedDataField } from '../../constants/text'
-import { saveImagesToDestroyedCollection } from '../../helpers/cloudinary'
+import { saveImagesToDestroyedCollection } from '../../utils/cloudinary'
 
 class ProductService {
     static async createProduct(data: {

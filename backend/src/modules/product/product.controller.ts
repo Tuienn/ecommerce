@@ -1,6 +1,6 @@
 import { ProductService } from '../index.service'
 import { handleSuccess } from '../../utils/handleRes'
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response } from 'express'
 import { invalidDataField, missingDataField } from '../../constants/text'
 import { BadRequestError } from '../../exceptions/error.handler'
 import { StatusCodes } from '../../constants/httpStatusCode'
@@ -18,7 +18,7 @@ class ProductController {
             stock,
             isActive = true,
             isFeatured
-        } = body
+        } = body || {}
 
         // Validate name nếu có
         if (name !== undefined) {
@@ -84,7 +84,7 @@ class ProductController {
 
     // Helper: Xử lý images cho update
     private static handleUpdateImages(body: any, files?: any): string[] | undefined {
-        const { images, oldImages } = body
+        const { images, oldImages } = body || {}
 
         // Case 1: JSON update với images array
         if (images !== undefined) {
@@ -116,276 +116,230 @@ class ProductController {
 
         return resultImages.length > 0 ? resultImages : undefined
     }
-    static async createProduct(req: Request, res: Response, next: NextFunction) {
-        try {
-            const {
-                name,
-                description,
-                categoryId,
-                basePrice,
-                discountPercent,
-                unit,
-                stock,
-                isActive = true,
-                isFeatured
-            } = req.body
 
-            // Validate required fields
-            if (!name || !categoryId || !basePrice) {
-                throw new BadRequestError(missingDataField('tên sản phẩm, danh mục hoặc giá gốc'))
-            }
+    static async createProduct(req: Request, res: Response) {
+        const {
+            name,
+            description,
+            categoryId,
+            basePrice,
+            discountPercent,
+            unit,
+            stock,
+            isActive = true,
+            isFeatured
+        } = req.body || {}
 
-            // Validate name
-            if (typeof name !== 'string' || name.trim().length === 0) {
-                throw new BadRequestError(invalidDataField('tên sản phẩm'))
-            }
-
-            // Validate basePrice (form-data trả về string nên cần parse)
-            const parsedBasePrice = parseFloat(basePrice)
-            if (isNaN(parsedBasePrice) || parsedBasePrice < 0) {
-                throw new BadRequestError(invalidDataField('giá gốc'))
-            }
-
-            // Validate discountPercent nếu có
-            let parsedDiscountPercent = 0
-            if (discountPercent) {
-                parsedDiscountPercent = parseFloat(discountPercent)
-                if (isNaN(parsedDiscountPercent) || parsedDiscountPercent < 0 || parsedDiscountPercent > 100) {
-                    throw new BadRequestError(invalidDataField('phần trăm giảm giá'))
-                }
-            }
-
-            // Validate stock nếu có
-            let parsedStock = 0
-            if (stock) {
-                parsedStock = parseInt(stock)
-                if (isNaN(parsedStock) || parsedStock < 0) {
-                    throw new BadRequestError(invalidDataField('số lượng tồn kho'))
-                }
-            }
-
-            // Lấy URLs từ uploaded files
-            const images: string[] = []
-            if (req.files && Array.isArray(req.files)) {
-                images.push(...req.files.map((file: any) => file.path))
-            }
-
-            // Parse boolean fields (form-data trả về string)\
-            const parsedIsActive = isActive === 'true' || isActive === true
-            const parsedIsFeatured = isFeatured === 'true' || isFeatured === true
-
-            const data = await ProductService.createProduct({
-                name: name.trim(),
-                description: description || '',
-                categoryId,
-                basePrice: parsedBasePrice,
-                discountPercent: parsedDiscountPercent,
-                unit: unit || 'kg',
-                stock: parsedStock,
-                images,
-                isActive: parsedIsActive,
-                isFeatured: parsedIsFeatured
-            })
-
-            return handleSuccess(res, data, 'Tạo sản phẩm thành công', StatusCodes.CREATED)
-        } catch (error) {
-            next(error)
-            return
+        // Validate required fields
+        if (!name || !categoryId || !basePrice) {
+            throw new BadRequestError(missingDataField('tên sản phẩm, danh mục hoặc giá gốc'))
         }
-    }
-    static async getAllProducts(req: Request, res: Response, next: NextFunction) {
-        try {
-            const page = req.query.page ? parseInt(req.query.page as string) : 1
-            const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
-            const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined
-            const isFeatured =
-                req.query.isFeatured === 'true' ? true : req.query.isFeatured === 'false' ? false : undefined
-            const categoryId = req.query.categoryId as string | undefined
 
-            const data = await ProductService.getAllProducts({ page, limit, isActive, categoryId, isFeatured })
-            return handleSuccess(res, data, 'Lấy danh sách sản phẩm thành công')
-        } catch (error) {
-            next(error)
-            return
+        // Validate name
+        if (typeof name !== 'string' || name.trim().length === 0) {
+            throw new BadRequestError(invalidDataField('tên sản phẩm'))
         }
+
+        // Validate basePrice (form-data trả về string nên cần parse)
+        const parsedBasePrice = parseFloat(basePrice)
+        if (isNaN(parsedBasePrice) || parsedBasePrice < 0) {
+            throw new BadRequestError(invalidDataField('giá gốc'))
+        }
+
+        // Validate discountPercent nếu có
+        let parsedDiscountPercent = 0
+        if (discountPercent) {
+            parsedDiscountPercent = parseFloat(discountPercent)
+            if (isNaN(parsedDiscountPercent) || parsedDiscountPercent < 0 || parsedDiscountPercent > 100) {
+                throw new BadRequestError(invalidDataField('phần trăm giảm giá'))
+            }
+        }
+
+        // Validate stock nếu có
+        let parsedStock = 0
+        if (stock) {
+            parsedStock = parseInt(stock)
+            if (isNaN(parsedStock) || parsedStock < 0) {
+                throw new BadRequestError(invalidDataField('số lượng tồn kho'))
+            }
+        }
+
+        // Lấy URLs từ uploaded files
+        const images: string[] = []
+        if (req.files && Array.isArray(req.files)) {
+            images.push(...req.files.map((file: any) => file.path))
+        }
+
+        // Parse boolean fields (form-data trả về string)\
+        const parsedIsActive = isActive === 'true' || isActive === true
+        const parsedIsFeatured = isFeatured === 'true' || isFeatured === true
+
+        const data = await ProductService.createProduct({
+            name: name.trim(),
+            description: description || '',
+            categoryId,
+            basePrice: parsedBasePrice,
+            discountPercent: parsedDiscountPercent,
+            unit: unit || 'kg',
+            stock: parsedStock,
+            images,
+            isActive: parsedIsActive,
+            isFeatured: parsedIsFeatured
+        })
+
+        return handleSuccess(res, data, 'Tạo sản phẩm thành công', StatusCodes.CREATED)
     }
 
-    static async searchProducts(req: Request, res: Response, next: NextFunction) {
-        try {
-            const page = req.query.page ? parseInt(req.query.page as string) : 1
-            const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
-            const name = req.query.name as string | undefined
-            const isFeatured =
-                req.query.isFeatured === 'true' ? true : req.query.isFeatured === 'false' ? false : undefined
+    static async getAllProducts(req: Request, res: Response) {
+        const page = req.query.page ? parseInt(req.query.page as string) : 1
+        const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
+        const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined
+        const isFeatured = req.query.isFeatured === 'true' ? true : req.query.isFeatured === 'false' ? false : undefined
+        const categoryId = req.query.categoryId as string | undefined
 
-            // Parse categoryIds - có thể là array hoặc string "id1,id2"
-            let categoryIds: string[] | undefined
-            if (req.query.categoryIds) {
-                if (typeof req.query.categoryIds === 'string') {
-                    // Nếu là string "id1,id2" thì split
-                    categoryIds = req.query.categoryIds.split(',').map((id) => id.trim())
-                } else if (Array.isArray(req.query.categoryIds)) {
-                    // Nếu đã là array
-                    categoryIds = req.query.categoryIds as string[]
-                }
-            }
-
-            // Parse sortPrice
-            let sortPrice: 'asc' | 'desc' | undefined
-            if (req.query.sortPrice === 'asc' || req.query.sortPrice === 'desc') {
-                sortPrice = req.query.sortPrice
-            }
-
-            // Parse sortDiscount
-            let sortDiscount: 'asc' | 'desc' | undefined
-            if (req.query.sortDiscount === 'asc' || req.query.sortDiscount === 'desc') {
-                sortDiscount = req.query.sortDiscount
-            }
-
-            const data = await ProductService.searchProducts({
-                page,
-                limit,
-                name,
-                categoryIds,
-                isFeatured,
-                sortPrice,
-                sortDiscount
-            })
-            return handleSuccess(res, data, 'Tìm kiếm sản phẩm thành công')
-        } catch (error) {
-            next(error)
-            return
-        }
+        const data = await ProductService.getAllProducts({ page, limit, isActive, categoryId, isFeatured })
+        return handleSuccess(res, data, 'Lấy danh sách sản phẩm thành công')
     }
 
-    static async simpleSearchProducts(req: Request, res: Response, next: NextFunction) {
-        try {
-            const page = req.query.page ? parseInt(req.query.page as string) : 1
-            const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
-            const name = req.query.name as string | undefined
-            const isFeatured =
-                req.query.isFeatured === 'true' ? true : req.query.isFeatured === 'false' ? false : undefined
+    static async searchProducts(req: Request, res: Response) {
+        const page = req.query.page ? parseInt(req.query.page as string) : 1
+        const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
+        const name = req.query.name as string | undefined
+        const isFeatured = req.query.isFeatured === 'true' ? true : req.query.isFeatured === 'false' ? false : undefined
 
-            // Parse categoryIds - có thể là array hoặc string "id1,id2"
-            let categoryIds: string[] | undefined
-            if (req.query.categoryIds) {
-                if (typeof req.query.categoryIds === 'string') {
-                    // Nếu là string "id1,id2" thì split
-                    categoryIds = req.query.categoryIds.split(',').map((id) => id.trim())
-                } else if (Array.isArray(req.query.categoryIds)) {
-                    // Nếu đã là array
-                    categoryIds = req.query.categoryIds as string[]
-                }
+        // Parse categoryIds - có thể là array hoặc string "id1,id2"
+        let categoryIds: string[] | undefined
+        if (req.query.categoryIds) {
+            if (typeof req.query.categoryIds === 'string') {
+                // Nếu là string "id1,id2" thì split
+                categoryIds = req.query.categoryIds.split(',').map((id) => id.trim())
+            } else if (Array.isArray(req.query.categoryIds)) {
+                // Nếu đã là array
+                categoryIds = req.query.categoryIds as string[]
             }
-
-            // Parse sortPrice
-            let sortPrice: 'asc' | 'desc' | undefined
-            if (req.query.sortPrice === 'asc' || req.query.sortPrice === 'desc') {
-                sortPrice = req.query.sortPrice
-            }
-
-            // Parse sortDiscount
-            let sortDiscount: 'asc' | 'desc' | undefined
-            if (req.query.sortDiscount === 'asc' || req.query.sortDiscount === 'desc') {
-                sortDiscount = req.query.sortDiscount
-            }
-
-            const data = await ProductService.searchProducts({
-                page,
-                limit,
-                name,
-                categoryIds,
-                isFeatured,
-                sortPrice,
-                sortDiscount
-            })
-            return handleSuccess(res, data, 'Tìm kiếm sản phẩm thành công')
-        } catch (error) {
-            next(error)
-            return
         }
+
+        // Parse sortPrice
+        let sortPrice: 'asc' | 'desc' | undefined
+        if (req.query.sortPrice === 'asc' || req.query.sortPrice === 'desc') {
+            sortPrice = req.query.sortPrice
+        }
+
+        // Parse sortDiscount
+        let sortDiscount: 'asc' | 'desc' | undefined
+        if (req.query.sortDiscount === 'asc' || req.query.sortDiscount === 'desc') {
+            sortDiscount = req.query.sortDiscount
+        }
+
+        const data = await ProductService.searchProducts({
+            page,
+            limit,
+            name,
+            categoryIds,
+            isFeatured,
+            sortPrice,
+            sortDiscount
+        })
+        return handleSuccess(res, data, 'Tìm kiếm sản phẩm thành công')
     }
 
-    static async getProductById(req: Request, res: Response, next: NextFunction) {
-        try {
-            const productId = req.params._id
-            const data = await ProductService.getProductById(productId)
-            return handleSuccess(res, data.toObject(), 'Lấy thông tin sản phẩm thành công')
-        } catch (error) {
-            next(error)
-            return
-        }
-    }
+    static async simpleSearchProducts(req: Request, res: Response) {
+        const page = req.query.page ? parseInt(req.query.page as string) : 1
+        const limit = req.query.limit ? parseInt(req.query.limit as string) : 10
+        const name = req.query.name as string | undefined
+        const isFeatured = req.query.isFeatured === 'true' ? true : req.query.isFeatured === 'false' ? false : undefined
 
-    static async updateProductById(req: Request, res: Response, next: NextFunction) {
-        try {
-            const productId = req.params._id
-
-            // Parse và validate tất cả fields (JSON body)
-            const updateData = ProductController.parseProductFields(req.body, false)
-
-            // Xử lý images
-            const images = ProductController.handleUpdateImages(req.body)
-            if (images !== undefined) {
-                updateData.images = images
+        // Parse categoryIds - có thể là array hoặc string "id1,id2"
+        let categoryIds: string[] | undefined
+        if (req.query.categoryIds) {
+            if (typeof req.query.categoryIds === 'string') {
+                // Nếu là string "id1,id2" thì split
+                categoryIds = req.query.categoryIds.split(',').map((id) => id.trim())
+            } else if (Array.isArray(req.query.categoryIds)) {
+                // Nếu đã là array
+                categoryIds = req.query.categoryIds as string[]
             }
-
-            const data = await ProductService.updateProduct(productId, updateData)
-            return handleSuccess(res, data, 'Cập nhật sản phẩm thành công')
-        } catch (error) {
-            next(error)
-            return
         }
+
+        // Parse sortPrice
+        let sortPrice: 'asc' | 'desc' | undefined
+        if (req.query.sortPrice === 'asc' || req.query.sortPrice === 'desc') {
+            sortPrice = req.query.sortPrice
+        }
+
+        // Parse sortDiscount
+        let sortDiscount: 'asc' | 'desc' | undefined
+        if (req.query.sortDiscount === 'asc' || req.query.sortDiscount === 'desc') {
+            sortDiscount = req.query.sortDiscount
+        }
+
+        const data = await ProductService.searchProducts({
+            page,
+            limit,
+            name,
+            categoryIds,
+            isFeatured,
+            sortPrice,
+            sortDiscount
+        })
+        return handleSuccess(res, data, 'Tìm kiếm sản phẩm thành công')
     }
 
-    static async updateProductWithUpload(req: Request, res: Response, next: NextFunction) {
-        try {
-            const productId = req.params._id
-
-            // Parse và validate tất cả fields (form-data body)
-            const updateData = ProductController.parseProductFields(req.body, true)
-
-            // Xử lý images (oldImages + uploaded files)
-            const images = ProductController.handleUpdateImages(req.body, req.files)
-            if (images !== undefined) {
-                updateData.images = images
-            }
-
-            const data = await ProductService.updateProduct(productId, updateData)
-            return handleSuccess(res, data, 'Cập nhật sản phẩm thành công')
-        } catch (error) {
-            next(error)
-            return
-        }
+    static async getProductById(req: Request, res: Response) {
+        const productId = req.params._id
+        const data = await ProductService.getProductById(productId)
+        return handleSuccess(res, data.toObject(), 'Lấy thông tin sản phẩm thành công')
     }
 
-    static async deleteProductById(req: Request, res: Response, next: NextFunction) {
-        try {
-            const productId = req.params._id
-            await ProductService.deleteProduct(productId)
-            return handleSuccess(res, null, 'Xóa sản phẩm thành công')
-        } catch (error) {
-            next(error)
-            return
+    static async updateProductById(req: Request, res: Response) {
+        const productId = req.params._id
+
+        // Parse và validate tất cả fields (JSON body)
+        const updateData = ProductController.parseProductFields(req.body, false)
+
+        // Xử lý images
+        const images = ProductController.handleUpdateImages(req.body)
+        if (images !== undefined) {
+            updateData.images = images
         }
+
+        const data = await ProductService.updateProduct(productId, updateData)
+        return handleSuccess(res, data, 'Cập nhật sản phẩm thành công')
     }
 
-    static async setActiveById(req: Request, res: Response, next: NextFunction) {
-        try {
-            const productId = req.params._id
-            const { isActive } = req.body
+    static async updateProductWithUpload(req: Request, res: Response) {
+        const productId = req.params._id
 
-            if (typeof isActive !== 'boolean') {
-                throw new BadRequestError(invalidDataField('trạng thái'))
-            }
+        // Parse và validate tất cả fields (form-data body)
+        const updateData = ProductController.parseProductFields(req.body, true)
 
-            const data = await ProductService.setProductActive(productId, isActive)
-            const message = isActive ? 'Đã bật sản phẩm' : 'Đã tắt sản phẩm'
-            return handleSuccess(res, data, message)
-        } catch (error) {
-            next(error)
-            return
+        // Xử lý images (oldImages + uploaded files)
+        const images = ProductController.handleUpdateImages(req.body, req.files)
+        if (images !== undefined) {
+            updateData.images = images
         }
+
+        const data = await ProductService.updateProduct(productId, updateData)
+        return handleSuccess(res, data, 'Cập nhật sản phẩm thành công')
+    }
+
+    static async deleteProductById(req: Request, res: Response) {
+        const productId = req.params._id
+        await ProductService.deleteProduct(productId)
+        return handleSuccess(res, null, 'Xóa sản phẩm thành công')
+    }
+
+    static async setActiveById(req: Request, res: Response) {
+        const productId = req.params._id
+        const { isActive } = req.body || {}
+
+        if (typeof isActive !== 'boolean') {
+            throw new BadRequestError(invalidDataField('trạng thái'))
+        }
+
+        const data = await ProductService.setProductActive(productId, isActive)
+        const message = isActive ? 'Đã bật sản phẩm' : 'Đã tắt sản phẩm'
+        return handleSuccess(res, data, message)
     }
 }
 
