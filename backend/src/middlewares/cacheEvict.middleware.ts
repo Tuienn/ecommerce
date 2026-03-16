@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { redisClient } from '../db/init.redis'
+import { redisClient } from '../db/redis.init'
 
 interface CacheEvictOptions {
     pattern?: string

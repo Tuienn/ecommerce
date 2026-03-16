@@ -6,10 +6,6 @@ import { BadRequestError } from '../exceptions/error.handler'
 const ALLOWED_FORMATS = ['jpg', 'png', 'jpeg', 'webp', 'mp4', 'mov']
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
-/**
- * Custom Multer Storage Engine sử dụng trực tiếp Cloudinary SDK
- * Thay thế hoàn toàn thư viện multer-storage-cloudinary
- */
 class CloudinaryStorageEngine implements multer.StorageEngine {
     _handleFile(
         req: Request,
